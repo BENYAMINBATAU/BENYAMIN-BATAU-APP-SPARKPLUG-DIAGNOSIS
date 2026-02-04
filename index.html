@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Benyamin Batau App - Sparkplug Diagnosis</title>
+    <style>
+        :root { --gold: #fbbf24; --danger: #ef4444; --bg: #0f172a; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: var(--bg); color: white; margin: 0; display: flex; justify-content: center; padding: 20px; }
+        .container { width: 100%; max-width: 500px; background: #1e293b; padding: 25px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); text-align: center; border: 1px solid #334155; }
+        .header h1 { font-size: 1.4rem; color: var(--gold); margin: 0; text-transform: uppercase; letter-spacing: 1px; }
+        .header h2 { font-size: 0.8rem; color: #94a3b8; margin: 5px 0 20px 0; font-weight: 400; }
+        #preview-container { width: 100%; height: 250px; background: #0f172a; border-radius: 15px; border: 2px dashed #475569; display: flex; align-items: center; justify-content: center; overflow: hidden; margin-bottom: 20px; position: relative; }
+        #preview-img { max-width: 100%; max-height: 100%; display: none; }
+        .upload-btn { background: var(--gold); color: #000; padding: 15px; border-radius: 12px; font-weight: 800; cursor: pointer; display: block; margin-bottom: 10px; transition: 0.3s; }
+        .analyze-btn { background: #2563eb; color: white; padding: 15px; border-radius: 12px; font-weight: 800; cursor: pointer; width: 100%; border: none; display: none; }
+        #result-area { margin-top: 20px; padding: 15px; background: #0f172a; border-radius: 12px; text-align: left; display: none; border-left: 5px solid var(--gold); }
+        .loading { display: none; margin: 20px 0; color: var(--gold); font-style: italic; }
+        .footer { margin-top: 30px; font-size: 0.7rem; color: #64748b; border-top: 1px solid #334155; padding-top: 15px; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="header">
+        <h1>Benyamin Batau App</h1>
+        <h2>Sparkplug Diagnosis TSM SMKN 1 Sumarorong</h2>
+    </div>
+
+    <div id="preview-container">
+        <span id="placeholder-text" style="color:#475569">Foto Busi Akan Muncul Disini</span>
+        <img id="preview-img" src="" alt="Preview">
+    </div>
+
+    <input type="file" id="imageInput" accept="image/*" capture="camera" style="display: none;">
+    <label for="imageInput" class="upload-btn">AMBIL FOTO BUSI (CLOSE-UP)</label>
+    
+    <button id="btnAnalyze" class="analyze-btn" onclick="startAnalysis()">MULAI ANALISIS AI</button>
+
+    <div id="loadingStatus" class="loading">Memproses gambar & menganalisis kondisi mesin...</div>
+
+    <div id="result-area">
+        <strong style="color: var(--gold);">HASIL DIAGNOSA:</strong>
+        <p id="ai-response" style="font-size: 0.9rem; line-height: 1.5; margin-top: 10px;"></p>
+    </div>
+
+    <div class="footer">
+        Sistem AI Pendeteksi Ruang Bakar<br>
+        Jurusan TSM - SMKN 1 SUMARORONG
+    </div>
+</div>
+
+
+
+<script>
+    const imageInput = document.getElementById('imageInput');
+    const previewImg = document.getElementById('preview-img');
+    const placeholder = document.getElementById('placeholder-text');
+    const btnAnalyze = document.getElementById('btnAnalyze');
+    const resultArea = document.getElementById('result-area');
+    const aiResponse = document.getElementById('ai-response');
+    const loadingStatus = document.getElementById('loadingStatus');
+
+    // --- CONFIG ---
+    const GEMINI_API_KEY = "MASUKKAN_API_KEY_ANDA_DISINI"; 
+    const GEMINI_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`;
+
+    imageInput.addEventListener('change', function() {
+        const file = this.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                previewImg.src = e.target.result;
+                previewImg.style.display = 'block';
+                placeholder.style.display = 'none';
+                btnAnalyze.style.display = 'block';
+                resultArea.style.display = 'none';
+            }
+            reader.readAsDataURL(file);
+        }
+    });
+
+    async function startAnalysis() {
+        const imageData = previewImg.src.split(',')[1]; // Ambil Base64 saja
+        
+        loadingStatus.style.display = 'block';
+        btnAnalyze.style.display = 'none';
+        resultArea.style.display = 'none';
+
+        const prompt = "Analisis foto busi ini. Sebutkan warna insulator (misal: coklat bata, putih, hitam kering, atau hitam basah). Jelaskan kondisi pembakaran mesin (normal, terlalu irit, atau boros bahan bakar/oli) dan berikan saran perbaikan singkat untuk teknis otomotif.";
+
+        const payload = {
+            contents: [{
+                parts: [
+                    { text: prompt },
+                    { inline_data: { mime_type: "image/jpeg", data: imageData } }
+                ]
+            }]
+        };
+
+        try {
+            const response = await fetch(GEMINI_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+
+            const data = await response.json();
+            const text = data.candidates[0].content.parts[0].text;
+
+            aiResponse.innerText = text;
+            resultArea.style.display = 'block';
+        } catch (error) {
+            aiResponse.innerText = "Gagal terhubung ke AI. Pastikan API Key benar dan koneksi internet aktif.";
+            resultArea.style.display = 'block';
+        } finally {
+            loadingStatus.style.display = 'none';
+        }
+    }
+</script>
+
+</body>
+</html>
