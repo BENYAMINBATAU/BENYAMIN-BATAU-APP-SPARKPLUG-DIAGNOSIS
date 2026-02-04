@@ -3,186 +3,111 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Benyamin Batau App - Sparkplug Diagnosis</title>
+    <title>Benyamin Batau App - SMKN 1 Sumarorong</title>
     <style>
-        :root { --gold: #fbbf24; --accent: #2563eb; --bg: #0f172a; --card: #1e293b; }
-        body { font-family: 'Segoe UI', Tahoma, sans-serif; background: var(--bg); color: white; margin: 0; padding: 20px; display: flex; justify-content: center; }
-        .container { width: 100%; max-width: 450px; background: var(--card); padding: 25px; border-radius: 25px; box-shadow: 0 15px 35px rgba(0,0,0,0.5); text-align: center; border: 1px solid #334155; }
-        
-        .header h1 { font-size: 1.6rem; color: var(--gold); margin: 0; text-transform: uppercase; letter-spacing: 1px; }
-        .header h2 { font-size: 0.85rem; color: #94a3b8; margin: 5px 0 25px 0; font-weight: 400; }
-
-        #preview-box { 
-            width: 100%; 
-            height: 300px; 
-            background: #0f172a; 
-            border: 2px dashed #475569; 
-            border-radius: 20px; 
-            display: flex; 
-            align-items: center; 
-            justify-content: center; 
-            margin-bottom: 20px; 
-            overflow: hidden;
-            position: relative;
-        }
-        #preview-img { max-width: 100%; max-height: 100%; display: none; object-fit: contain; }
-        
-        .btn-main { 
-            background: var(--gold); 
-            color: #000; 
-            padding: 18px; 
-            border-radius: 15px; 
-            font-weight: 800; 
-            cursor: pointer; 
-            display: block; 
-            width: 100%; 
-            border: none; 
-            font-size: 1rem;
-            margin-bottom: 15px;
-            transition: 0.3s;
-        }
-        .btn-main:active { transform: scale(0.98); }
-
-        .btn-analyze { 
-            background: var(--accent); 
-            color: white; 
-            padding: 18px; 
-            border-radius: 15px; 
-            font-weight: 800; 
-            cursor: pointer; 
-            width: 100%; 
-            border: none; 
-            display: none; 
-            font-size: 1rem;
-            box-shadow: 0 4px 15px rgba(37, 99, 235, 0.4);
-        }
-
-        #loading { display: none; margin: 20px 0; color: var(--gold); font-weight: bold; }
-        
-        #result-box { 
-            margin-top: 25px; 
-            padding: 20px; 
-            background: #0f172a; 
-            border-radius: 15px; 
-            text-align: left; 
-            display: none; 
-            border-left: 6px solid var(--gold); 
-            line-height: 1.6;
-            animation: fadeIn 0.5s ease;
-        }
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-
-        .footer { margin-top: 30px; font-size: 0.75rem; color: #64748b; border-top: 1px solid #334155; padding-top: 15px; }
+        :root { --gold: #fbbf24; --accent: #2563eb; --bg: #0f172a; }
+        body { font-family: system-ui, -apple-system, sans-serif; background: var(--bg); color: white; margin: 0; padding: 20px; display: flex; justify-content: center; }
+        .card { width: 100%; max-width: 400px; background: #1e293b; padding: 25px; border-radius: 20px; text-align: center; border: 1px solid #334155; box-shadow: 0 10px 25px rgba(0,0,0,0.5); }
+        h1 { font-size: 1.4rem; color: var(--gold); margin: 0; }
+        #preview-box { width: 100%; height: 250px; background: #0f172a; border-radius: 15px; border: 2px dashed #475569; display: flex; align-items: center; justify-content: center; margin: 20px 0; overflow: hidden; }
+        #img-out { max-width: 100%; max-height: 100%; display: none; }
+        .btn { background: var(--gold); color: #000; padding: 15px; border-radius: 12px; font-weight: bold; cursor: pointer; display: block; width: 100%; border: none; margin-bottom: 10px; font-size: 1rem; }
+        #res-box { margin-top: 20px; padding: 15px; background: #0f172a; border-radius: 12px; text-align: left; display: none; border-left: 5px solid var(--gold); }
     </style>
 </head>
 <body>
 
-<div class="container">
-    <div class="header">
-        <h1>BENYAMIN BATAU APP</h1>
-        <h2>Sparkplug Diagnosis TSM SMKN 1 Sumarorong</h2>
-    </div>
+<div class="card">
+    <h1>BENYAMIN BATAU APP</h1>
+    <p style="color:#94a3b8; font-size:0.8rem;">Diagnosis Busi TSM SMKN 1 Sumarorong</p>
 
     <div id="preview-box">
-        <span id="label-info" style="color: #475569; font-size: 0.9rem;">Belum ada foto busi</span>
-        <img id="preview-img" src="" alt="Preview Busi">
+        <span id="label" style="color:#475569">Foto Busi Disini</span>
+        <img id="img-out">
     </div>
 
-    <input type="file" id="camera-input" accept="image/*" capture="camera" style="display: none;">
-    <button class="btn-main" onclick="document.getElementById('camera-input').click()">AMBIL FOTO BUSI</button>
-    
-    <button id="btn-run" class="btn-analyze" onclick="mulaiDiagnosa()">MULAI ANALISIS AI</button>
+    <input type="file" id="file-inp" accept="image/*" capture="camera" style="display:none">
+    <button class="btn" onclick="document.getElementById('file-inp').click()">AMBIL FOTO</button>
+    <button id="btn-scan" class="btn" style="background:#2563eb; color:#fff; display:none" onclick="proses()">ANALISIS AI</button>
 
-    <div id="loading">⚡ AI SEDANG MENGANALISIS...</div>
+    <div id="loading" style="display:none; color:var(--gold); margin:15px;">⚡ Sedang Menganalisis...</div>
 
-    <div id="result-box">
-        <strong style="color: var(--gold); font-size: 1.1rem;">HASIL DIAGNOSA TEKNIS:</strong>
-        <p id="hasil-teks" style="font-size: 0.95rem; margin-top: 10px; color: #e2e8f0; white-space: pre-wrap;"></p>
-    </div>
-
-    <div class="footer">
-        Aplikasi Diagnosa Ruang Bakar Digital<br>
-        <strong>Jurusan TSM - SMKN 1 SUMARORONG</strong>
+    <div id="res-box">
+        <strong style="color:var(--gold)">HASIL DIAGNOSA:</strong>
+        <p id="teks-hasil" style="font-size:0.9rem; line-height:1.6;"></p>
     </div>
 </div>
 
 <script>
-    // KONFIGURASI API
-    const API_KEY = "AIzaSyDcqCfYvtp2D7Y-LLYr9kTAElIOy0K_2JI"; 
-    // Menggunakan v1 (Production) untuk stabilitas
-    const URL_ENDPOINT = "https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=" + API_KEY;
+    // API KEY ANDA
+    const KEY = "AIzaSyDcqCfYvtp2D7Y-LLYr9kTAElIOy0K_2JI"; 
+    
+    // ENDPOINT TERBARU v1beta
+    const API_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=" + KEY;
 
-    const inputKamera = document.getElementById('camera-input');
-    const gambarPreview = document.getElementById('preview-img');
-    const tombolAnalisis = document.getElementById('btn-run');
-    const teksLabel = document.getElementById('label-info');
+    const inp = document.getElementById('file-inp');
+    const preview = document.getElementById('img-out');
+    const btnScan = document.getElementById('btn-scan');
 
-    // Fungsi saat foto dipilih
-    inputKamera.onchange = function() {
-        const file = this.files[0];
-        if (file) {
+    inp.onchange = (e) => {
+        const file = e.target.files[0];
+        if(file) {
             const reader = new FileReader();
-            reader.onload = function(e) {
-                gambarPreview.src = e.target.result;
-                gambarPreview.style.display = 'block';
-                teksLabel.style.display = 'none';
-                tombolAnalisis.style.display = 'block';
-                document.getElementById('result-box').style.display = 'none';
-            }
+            reader.onload = (ev) => {
+                preview.src = ev.target.result;
+                preview.style.display = 'block';
+                document.getElementById('label').style.display = 'none';
+                btnScan.style.display = 'block';
+                document.getElementById('res-box').style.display = 'none';
+            };
             reader.readAsDataURL(file);
         }
     };
 
-    // Fungsi kirim data ke AI
-    async function mulaiDiagnosa() {
-        const base64Data = gambarPreview.src.split(',')[1];
-        const loader = document.getElementById('loading');
-        const boxHasil = document.getElementById('result-box');
-        const teksHasil = document.getElementById('hasil-teks');
+    async function proses() {
+        const load = document.getElementById('loading');
+        const out = document.getElementById('teks-hasil');
+        const box = document.getElementById('res-box');
+        
+        load.style.display = 'block';
+        btnScan.style.display = 'none';
 
-        loader.style.display = 'block';
-        tombolAnalisis.style.display = 'none';
+        const base64Data = preview.src.split(',')[1];
 
-        const promptInstruksi = "Analisis foto busi ini sebagai instruktur TSM senior. Jelaskan warna insulator, kondisi pembakaran mesin (normal/irit/boros oli), dan langkah servis yang diperlukan siswa.";
-
-        const dataKirim = {
+        // Format Payload diperbarui sesuai standar terbaru Google
+        const payload = {
             contents: [{
                 parts: [
-                    { text: promptInstruksi },
+                    { text: "Analisis kondisi busi ini. Sebutkan warna insulator dan kondisi mesin." },
                     { inline_data: { mime_type: "image/jpeg", data: base64Data } }
                 ]
             }]
         };
 
         try {
-            const response = await fetch(URL_ENDPOINT, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(dataKirim)
+            const resp = await fetch(API_URL, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(payload)
             });
 
-            const json = await response.json();
+            const data = await resp.json();
 
-            if (json.error) {
-                throw new Error(json.error.message);
-            }
-
-            if (json.candidates && json.candidates[0].content) {
-                const jawabanAI = json.candidates[0].content.parts[0].text;
-                teksHasil.innerText = jawabanAI;
-                boxHasil.style.display = 'block';
+            if (data.error) {
+                // Menangani error spesifik dari Google
+                out.innerText = "Info: " + data.error.message;
+            } else if (data.candidates && data.candidates[0].content) {
+                out.innerText = data.candidates[0].content.parts[0].text;
             } else {
-                throw new Error("AI tidak merespons gambar. Coba ambil foto lebih jelas.");
+                out.innerText = "Gagal mendapatkan respon. Pastikan foto jelas.";
             }
-
         } catch (err) {
-            teksHasil.innerText = "KENDALA: " + err.message + "\n\nPastikan internet aktif dan foto busi terlihat jelas.";
-            boxHasil.style.display = 'block';
+            out.innerText = "Koneksi Bermasalah. Coba lagi.";
         } finally {
-            loader.style.display = 'none';
+            load.style.display = 'none';
+            box.style.display = 'block';
         }
     }
 </script>
-
 </body>
 </html>
