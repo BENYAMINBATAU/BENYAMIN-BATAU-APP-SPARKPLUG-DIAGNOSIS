@@ -18,18 +18,18 @@
 
 <div class="card">
     <h2 style="color:var(--gold)">AI MULTI-SCANNER</h2>
-    <p style="font-size: 0.8rem; color: #94a3b8;">Coba foto benda apa saja (Busi, Kunci, dll)</p>
+    <p style="font-size: 0.8rem; color: #94a3b8;">SMKN 1 Sumarorong - Diagnosis Benda & Busi</p>
 
     <div id="preview">
-        <span id="label">Foto Benda</span>
+        <span id="label">Ambil Foto Benda</span>
         <img id="img-out">
     </div>
 
     <input type="file" id="inp" accept="image/*" capture="camera" style="display:none">
     <button class="btn" onclick="document.getElementById('inp').click()">AMBIL FOTO</button>
-    <button id="btn-go" class="btn" style="background:var(--accent); color:#fff; display:none" onclick="scan()">TANYA AI</button>
+    <button id="btn-go" class="btn" style="background:var(--accent); color:#fff; display:none" onclick="scan()">MULAI ANALISIS</button>
 
-    <div id="load" style="display:none; color:var(--gold); margin:15px;">⚡ Sedang Berpikir...</div>
+    <div id="load" style="display:none; color:var(--gold); margin:15px;">⚡ Menghubungkan ke AI...</div>
 
     <div id="result-box">
         <strong>HASIL ANALISIS:</strong>
@@ -38,9 +38,11 @@
 </div>
 
 <script>
+    // API Key Anda dari gambar
     const API_KEY = "AIzaSyDcqCfYvtp2D7Y-LLYr9kTAElIOy0K_2JI"; 
-    // Menggunakan Endpoint v1 (Global Production)
-    const ENDPOINT = "https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=" + API_KEY;
+    
+    // Mencoba versi v1beta yang biasanya lebih mendukung model Flash terbaru
+    const ENDPOINT = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=" + API_KEY;
 
     const inp = document.getElementById('inp');
     const img = document.getElementById('img-out');
@@ -55,6 +57,7 @@
                 img.style.display = 'block';
                 document.getElementById('label').style.display = 'none';
                 btnGo.style.display = 'block';
+                document.getElementById('result-box').style.display = 'none';
             };
             reader.readAsDataURL(file);
         }
@@ -73,7 +76,7 @@
         const payload = {
             contents: [{
                 parts: [
-                    { text: "Jelaskan benda apa ini dalam bahasa Indonesia yang singkat dan padat." },
+                    { text: "Jelaskan benda ini dalam bahasa Indonesia. Jika ini busi, analisis warna insulator dan kondisi pembakaran mesin." },
                     { inline_data: { mime_type: "image/jpeg", data: base64 } }
                 ]
             }]
@@ -89,12 +92,13 @@
             const data = await r.json();
 
             if (data.error) {
-                out.innerText = "Error: " + data.error.message;
+                // Jika error, tampilkan detail untuk diagnosa lebih lanjut
+                out.innerText = "Sistem Google: " + data.error.message;
             } else {
                 out.innerText = data.candidates[0].content.parts[0].text;
             }
         } catch (err) {
-            out.innerText = "Koneksi gagal. Coba matikan VPN jika ada.";
+            out.innerText = "Gagal memproses. Periksa jaringan internet Anda.";
         } finally {
             load.style.display = 'none';
             box.style.display = 'block';
