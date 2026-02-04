@@ -3,97 +3,110 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sparkplug Diagnosis - SMKN 1 Sumarorong</title>
+    <title>Benyamin Batau App - Sparkplug Diagnosis</title>
     <style>
-        :root { --gold: #fbbf24; --bg: #0f172a; }
-        body { font-family: sans-serif; background: var(--bg); color: white; margin: 0; display: flex; justify-content: center; padding: 20px; }
-        .container { width: 100%; max-width: 450px; background: #1e293b; padding: 25px; border-radius: 20px; text-align: center; border: 1px solid #334155; }
-        h1 { font-size: 1.3rem; color: var(--gold); margin: 0; }
-        h2 { font-size: 0.8rem; color: #94a3b8; margin: 5px 0 20px 0; }
-        #preview-container { width: 100%; height: 250px; background: #0f172a; border-radius: 15px; border: 2px dashed #475569; display: flex; align-items: center; justify-content: center; margin-bottom: 20px; }
-        #preview-img { max-width: 100%; max-height: 100%; display: none; border-radius: 10px; }
-        .upload-btn { background: var(--gold); color: #000; padding: 15px; border-radius: 12px; font-weight: bold; cursor: pointer; display: block; margin-bottom: 10px; }
-        .analyze-btn { background: #2563eb; color: white; padding: 15px; border-radius: 12px; font-weight: bold; cursor: pointer; width: 100%; border: none; display: none; }
-        #result-area { margin-top: 20px; padding: 15px; background: #0f172a; border-radius: 12px; text-align: left; display: none; border-left: 5px solid var(--gold); }
-        .loading { display: none; margin: 20px 0; color: var(--gold); }
+        :root { --gold: #fbbf24; --accent: #2563eb; --bg: #0f172a; --card: #1e293b; }
+        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: white; margin: 0; padding: 20px; display: flex; justify-content: center; }
+        .container { width: 100%; max-width: 400px; background: var(--card); padding: 25px; border-radius: 25px; box-shadow: 0 15px 35px rgba(0,0,0,0.5); text-align: center; border: 1px solid #334155; }
+        h1 { font-size: 1.5rem; color: var(--gold); margin: 0; text-transform: uppercase; }
+        h2 { font-size: 0.85rem; color: #94a3b8; margin: 5px 0 25px 0; font-weight: 400; letter-spacing: 0.5px; }
+        #preview-box { width: 100%; height: 280px; background: #0f172a; border: 2px dashed #475569; border-radius: 20px; display: flex; align-items: center; justify-content: center; margin-bottom: 20px; overflow: hidden; position: relative; }
+        #preview-img { max-width: 100%; max-height: 100%; display: none; object-fit: contain; }
+        .btn-camera { background: var(--gold); color: #000; padding: 18px; border-radius: 15px; font-weight: 800; cursor: pointer; display: block; margin-bottom: 15px; transition: 0.3s; border: none; width: 100%; font-size: 1rem; }
+        .btn-analyze { background: var(--accent); color: white; padding: 18px; border-radius: 15px; font-weight: 800; cursor: pointer; width: 100%; border: none; display: none; font-size: 1rem; box-shadow: 0 4px 15px rgba(37, 99, 235, 0.4); }
+        #loading { display: none; margin: 20px 0; color: var(--gold); font-weight: bold; animation: pulse 1.5s infinite; }
+        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
+        #result-box { margin-top: 25px; padding: 20px; background: #0f172a; border-radius: 15px; text-align: left; display: none; border-left: 6px solid var(--gold); line-height: 1.6; }
+        .footer { margin-top: 25px; font-size: 0.75rem; color: #64748b; border-top: 1px solid #334155; padding-top: 15px; }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <h1>Benyamin Batau App</h1>
+    <h1>BENYAMIN BATAU APP</h1>
     <h2>Sparkplug Diagnosis TSM SMKN 1 Sumarorong</h2>
 
-    <div id="preview-container">
-        <span id="placeholder">Ambil Foto Busi</span>
+    <div id="preview-box">
+        <span id="label-info" style="color: #475569; font-size: 0.9rem;">Belum ada foto busi</span>
         <img id="preview-img" src="">
     </div>
 
-    <input type="file" id="imageInput" accept="image/*" capture="camera" style="display: none;">
-    <label for="imageInput" class="upload-btn">FOTO BUSI (CLOSE-UP)</label>
+    <input type="file" id="camera-input" accept="image/*" capture="camera" style="display: none;">
+    <button class="btn-camera" onclick="document.getElementById('camera-input').click()">AMBIL FOTO BUSI</button>
     
-    <button id="btnAnalyze" class="analyze-btn" onclick="startAnalysis()">ANALISIS SEKARANG</button>
+    <button id="btn-run" class="btn-analyze" onclick="mulaiDiagnosa()">MULAI ANALISIS AI</button>
 
-    <div id="loadingStatus" class="loading">Sabar, AI sedang membaca warna busi...</div>
+    <div id="loading">⚡ AI SEDANG MENGANALISIS...</div>
 
-    <div id="result-area">
-        <strong style="color: var(--gold);">HASIL ANALISIS:</strong>
-        <p id="ai-response" style="font-size: 0.9rem; line-height: 1.6;"></p>
+    <div id="result-box">
+        <strong style="color: var(--gold); font-size: 1rem;">HASIL DIAGNOSA TEKNIS:</strong>
+        <p id="hasil-teks" style="font-size: 0.95rem; margin-top: 10px; color: #e2e8f0;"></p>
+    </div>
+
+    <div class="footer">
+        Dibuat untuk Praktikum Jurusan TSM<br>
+        <strong>SMKN 1 SUMARORONG</strong>
     </div>
 </div>
 
 <script>
-    const imageInput = document.getElementById('imageInput');
-    const previewImg = document.getElementById('preview-img');
-    const btnAnalyze = document.getElementById('btnAnalyze');
-    const aiResponse = document.getElementById('ai-response');
+    // API KEY SUDAH TERPASANG
+    const API_KEY = "AIzaSyDcqCfYvtp2D7Y-LLYr9kTAElIOy0K_2JI"; 
+    const URL_GEMINI = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${API_KEY}`;
 
-    // --- TEMPEL API KEY DI SINI ---
-    const GEMINI_API_KEY = "MASUKKAN_API_KEY_ANDA_DI_SINI"; 
+    const inp = document.getElementById('camera-input');
+    const img = document.getElementById('preview-img');
+    const btn = document.getElementById('btn-run');
+    const label = document.getElementById('label-info');
 
-    imageInput.addEventListener('change', function() {
+    inp.onchange = function() {
         const file = this.files[0];
         if (file) {
             const reader = new FileReader();
             reader.onload = function(e) {
-                previewImg.src = e.target.result;
-                previewImg.style.display = 'block';
-                document.getElementById('placeholder').style.display = 'none';
-                btnAnalyze.style.display = 'block';
+                img.src = e.target.result;
+                img.style.display = 'block';
+                label.style.display = 'none';
+                btn.style.display = 'block';
+                document.getElementById('result-box').style.display = 'none';
             }
             reader.readAsDataURL(file);
         }
-    });
+    };
 
-    async function startAnalysis() {
-        const imageData = previewImg.src.split(',')[1];
-        const loading = document.getElementById('loadingStatus');
-        const resultBox = document.getElementById('result-area');
-        
-        loading.style.display = 'block';
-        btnAnalyze.style.display = 'none';
+    async function mulaiDiagnosa() {
+        const base64Data = img.src.split(',')[1];
+        const loader = document.getElementById('loading');
+        const resBox = document.getElementById('result-box');
+        const resText = document.getElementById('hasil-teks');
 
-        const prompt = "Analisis foto busi ini. Berikan warna HEX dominan dari insulator, jelaskan kondisi pembakaran mesin (normal/irit/boros), dan beri saran teknis singkat untuk siswa SMK.";
+        loader.style.display = 'block';
+        btn.style.display = 'none';
+
+        const instruksi = "Kamu adalah ahli mekanik motor senior. Analisis foto busi ini. Berikan warna HEX dominan dari insulator, jelaskan kondisi pembakaran mesin (apakah normal, terlalu irit, atau bocor oli), dan berikan saran perbaikan singkat untuk siswa jurusan TSM SMK.";
 
         try {
-            const resp = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`, {
+            const respons = await fetch(URL_GEMINI, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    contents: [{ parts: [{ text: prompt }, { inline_data: { mime_type: "image/jpeg", data: imageData } }] }]
+                    contents: [{ parts: [{ text: instruksi }, { inline_data: { mime_type: "image/jpeg", data: base64Data } }] }]
                 })
             });
 
-            const resData = await resp.json();
-            aiResponse.innerText = resData.candidates[0].content.parts[0].text;
-            resultBox.style.display = 'block';
-        } catch (e) {
-            aiResponse.innerText = "Error: " + e.message + ". Pastikan API Key benar!";
-            resultBox.style.display = 'block';
+            const hasilJSON = await respons.json();
+            const jawaban = hasilJSON.candidates[0].content.parts[0].text;
+
+            resText.innerText = jawaban;
+            resBox.style.display = 'block';
+        } catch (err) {
+            resText.innerText = "Maaf, sistem sibuk atau API Key bermasalah. Pastikan internet aktif.";
+            resBox.style.display = 'block';
         } finally {
-            loading.style.display = 'none';
+            loader.style.display = 'none';
         }
     }
 </script>
+
 </body>
 </html>
