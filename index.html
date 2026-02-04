@@ -3,87 +3,82 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI Scanner - Benyamin Batau</title>
+    <title>AI Scanner SMKN 1 Sumarorong</title>
     <style>
-        :root { --accent: #2563eb; --gold: #fbbf24; }
-        body { font-family: sans-serif; background: #0f172a; color: white; text-align: center; padding: 20px; }
-        .card { max-width: 400px; margin: auto; background: #1e293b; padding: 20px; border-radius: 20px; border: 1px solid #334155; }
-        #preview { width: 100%; height: 250px; background: #000; border-radius: 15px; margin: 20px 0; display: flex; align-items: center; justify-content: center; overflow: hidden; border: 2px dashed #475569; }
+        body { font-family: sans-serif; background: #0f172a; color: white; text-align: center; padding: 20px; margin: 0; }
+        .card { max-width: 400px; margin: auto; background: #1e293b; padding: 20px; border-radius: 20px; box-shadow: 0 10px 20px rgba(0,0,0,0.4); }
+        #box { width: 100%; height: 250px; background: #000; border-radius: 15px; margin: 20px 0; display: flex; align-items: center; justify-content: center; border: 2px dashed #475569; }
         img { max-width: 100%; max-height: 100%; display: none; }
-        .btn { background: var(--gold); color: #000; padding: 15px; border: none; border-radius: 12px; font-weight: bold; width: 100%; cursor: pointer; font-size: 1rem; margin-bottom: 10px; }
-        #result-box { background: #0f172a; padding: 15px; border-radius: 12px; text-align: left; display: none; border-left: 5px solid var(--accent); margin-top: 20px; }
+        .btn { background: #fbbf24; color: black; padding: 15px; border: none; border-radius: 12px; font-weight: bold; width: 100%; cursor: pointer; margin-bottom: 10px; }
+        #res { background: #0f172a; padding: 15px; border-radius: 12px; text-align: left; display: none; margin-top: 20px; border-left: 5px solid #2563eb; }
     </style>
 </head>
 <body>
 
 <div class="card">
-    <h2 style="color:var(--gold)">AI MULTI-SCANNER</h2>
-    <p style="font-size: 0.8rem; color: #94a3b8;">SMKN 1 Sumarorong - Diagnosis Benda & Busi</p>
+    <h2 style="color:#fbbf24">BENYAMIN BATAU APP</h2>
+    <p style="color:#94a3b8; font-size:0.8rem;">Diagnosis Busi & Benda - TSM</p>
 
-    <div id="preview">
-        <span id="label">Ambil Foto Benda</span>
-        <img id="img-out">
+    <div id="box">
+        <span id="label">Ambil Foto</span>
+        <img id="preview">
     </div>
 
     <input type="file" id="inp" accept="image/*" capture="camera" style="display:none">
     <button class="btn" onclick="document.getElementById('inp').click()">AMBIL FOTO</button>
-    <button id="btn-go" class="btn" style="background:var(--accent); color:#fff; display:none" onclick="scan()">MULAI ANALISIS</button>
+    <button id="btn-go" class="btn" style="background:#2563eb; color:white; display:none" onclick="analisis()">MINTA ANALISIS AI</button>
 
-    <div id="load" style="display:none; color:var(--gold); margin:15px;">⚡ Menghubungkan ke AI...</div>
+    <div id="loading" style="display:none; color:#fbbf24; margin:15px;">⏳ Tunggu, AI sedang melihat...</div>
 
-    <div id="result-box">
-        <strong>HASIL ANALISIS:</strong>
-        <p id="out-text" style="font-size:0.9rem; line-height:1.6;"></p>
+    <div id="res">
+        <strong style="color:#fbbf24">HASIL:</strong>
+        <p id="teks" style="font-size:0.9rem; line-height:1.6;"></p>
     </div>
 </div>
 
 <script>
-    // API Key Anda dari gambar
-    const API_KEY = "AIzaSyDcqCfYvtp2D7Y-LLYr9kTAElIOy0K_2JI"; 
-    
-    // Mencoba versi v1beta yang biasanya lebih mendukung model Flash terbaru
-    const ENDPOINT = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=" + API_KEY;
+    const KEY = "AIzaSyDcqCfYvtp2D7Y-LLYr9kTAElIOy0K_2JI"; 
+    // MENGGUNAKAN VERSI TERBARU YANG LEBIH COCOK UNTUK FREE TIER
+    const URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=" + KEY;
 
     const inp = document.getElementById('inp');
-    const img = document.getElementById('img-out');
-    const btnGo = document.getElementById('btn-go');
+    const pre = document.getElementById('preview');
+    const btn = document.getElementById('btn-go');
 
     inp.onchange = (e) => {
         const file = e.target.files[0];
         if(file) {
             const reader = new FileReader();
             reader.onload = (ev) => {
-                img.src = ev.target.result;
-                img.style.display = 'block';
+                pre.src = ev.target.result;
+                pre.style.display = 'block';
                 document.getElementById('label').style.display = 'none';
-                btnGo.style.display = 'block';
-                document.getElementById('result-box').style.display = 'none';
+                btn.style.display = 'block';
+                document.getElementById('res').style.display = 'none';
             };
             reader.readAsDataURL(file);
         }
     };
 
-    async function scan() {
-        const load = document.getElementById('load');
-        const out = document.getElementById('out-text');
-        const box = document.getElementById('result-box');
+    async function analisis() {
+        const load = document.getElementById('loading');
+        const out = document.getElementById('teks');
+        const box = document.getElementById('res');
         
         load.style.display = 'block';
-        btnGo.style.display = 'none';
+        btn.style.display = 'none';
 
-        const base64 = img.src.split(',')[1];
+        const base64 = pre.src.split(',')[1];
 
         const payload = {
             contents: [{
-                parts: [
-                    { text: "Jelaskan benda ini dalam bahasa Indonesia. Jika ini busi, analisis warna insulator dan kondisi pembakaran mesin." },
-                    { inline_data: { mime_type: "image/jpeg", data: base64 } }
-                ]
+                parts: [{ text: "Jelaskan benda apa ini. Jika busi, beritahu kondisi mesin." },
+                        { inline_data: { mime_type: "image/jpeg", data: base64 }}]
             }]
         };
 
         try {
-            const r = await fetch(ENDPOINT, {
+            const r = await fetch(URL, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(payload)
@@ -92,13 +87,13 @@
             const data = await r.json();
 
             if (data.error) {
-                // Jika error, tampilkan detail untuk diagnosa lebih lanjut
-                out.innerText = "Sistem Google: " + data.error.message;
+                // TAMPILKAN ERROR ASLI DARI GOOGLE
+                out.innerText = "Info Google: " + data.error.message;
             } else {
                 out.innerText = data.candidates[0].content.parts[0].text;
             }
         } catch (err) {
-            out.innerText = "Gagal memproses. Periksa jaringan internet Anda.";
+            out.innerText = "Koneksi gagal. Coba ganti jaringan atau matikan VPN.";
         } finally {
             load.style.display = 'none';
             box.style.display = 'block';
