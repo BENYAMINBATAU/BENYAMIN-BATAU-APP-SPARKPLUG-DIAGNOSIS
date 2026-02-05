@@ -86,18 +86,119 @@
 <script>
     // PERBENDAHARAAN WARNA TERKALIBRASI (10 KONDISI UTAMA)
     const LIBRARY = [
-        { name: "Normal (Optimal)", rgb: [175, 140, 110], ind: "Coklat muda/keabu-abuan. Pembakaran sangat efisien.", pen: "AFR Stoikiometri (14.7:1) & Ignition Timing tepat.", sol: "Perawatan rutin & cek celah busi (0.8mm - 0.9mm)." },
-        { name: "Carbon Fouling", rgb: [45, 45, 45], ind: "Hitam kering berjelaga. Arus listrik bocor melalui kerak.", pen: "Campuran boros, filter udara buntu, atau sering lari pelan.", sol: "Bersihkan filter udara, cek sensor EOT/ECT atau Injektor." },
-        { name: "Oil Fouling", rgb: [15, 15, 15], ind: "Hitam basah berminyak. Sangat sulit dihidupkan.", pen: "Kebocoran oli lewat ring piston atau seal katup.", sol: "Cek tekanan kompresi. Wajib ganti komponen internal mesin." },
-        { name: "Overheating", rgb: [245, 245, 245], ind: "Putih melepuh mengkilap. Elektroda terkikis.", pen: "Oktan bensin terlalu rendah atau busi tipe terlalu panas.", sol: "Ganti ke bensin oktan tinggi (92+) & gunakan busi tipe dingin." },
-        { name: "Ash Deposits", rgb: [170, 170, 160], ind: "Kerak abu berwarna krem/putih kapur.", pen: "Aditif oli mesin atau bensin kualitas rendah terbakar.", sol: "Ganti merek oli mesin ke standar JASO yang lebih baik." },
-        { name: "Lead Fouling", rgb: [130, 100, 60], ind: "Coklat kekuningan seperti lapisan kaca.", pen: "Penggunaan bensin bertimbal atau oplosan.", sol: "Kuras tangki bensin dan bersihkan ruang bakar." },
-        { name: "Lean (Terlalu Irit)", rgb: [215, 215, 215], ind: "Sangat bersih dan kering putih tanpa noda.", pen: "Suplai bensin kurang. Bahaya panas berlebih pada mesin.", sol: "Cek tekanan Fuel Pump (min. 294 kPa) & Intake Manifold." },
-        { name: "Detonasi (Knocking)", rgb: [195, 195, 195], ind: "Insulator retak atau ada bintik logam menempel.", pen: "Ledakan tidak terkendali (Ngelitik) karena deposit karbon.", sol: "Lakukan Gurah Mesin (Carbon Cleaning) di ruang bakar." },
-        { name: "Worn Out (Aus)", rgb: [160, 160, 160], ind: "Warna normal tapi elektroda sudah membulat/habis.", pen: "Masa pakai busi sudah lewat batas (Busi lama).", sol: "Ganti busi baru sesuai kode spesifikasi pabrikan." },
-        { name: "Glazing", rgb: [140, 110, 50], ind: "Warna kuning mengkilap (transparan).", pen: "Suhu mesin naik mendadak (High Load) saat mesin kotor.", sol: "Ganti busi baru, deposit ini tidak bisa dibersihkan." }
-    ];
+    // --- KELOMPOK NORMAL (COKLAT/TAN) - 20 VARIASI ---
+    { name: "Normal (Ideal Light)", rgb: [188, 150, 120], ind: "Coklat muda/Tan cerah. Efisiensi tinggi.", pen: "Pembakaran sempurna.", sol: "Pertahankan settingan." },
+    { name: "Normal (Standard)", rgb: [175, 140, 110], ind: "Coklat standar. Kondisi mesin sehat.", pen: "AFR ideal 14.7:1.", sol: "Cek setiap 4.000 KM." },
+    { name: "Normal (Warm Tan)", rgb: [170, 130, 100], ind: "Coklat hangat. Mesin bekerja optimal.", pen: "Ignition timing tepat.", sol: "Bersihkan drat busi." },
+    { name: "Normal (Grayish Tan)", rgb: [165, 145, 125], ind: "Coklat keabu-abuan. Kondisi stabil.", pen: "Bensin kualitas baik.", sol: "Perawatan rutin." },
+    { name: "Normal (Deep Brown)", rgb: [155, 120, 95], ind: "Coklat agak tua. Masih dalam batas aman.", pen: "Suhu operasional normal.", sol: "Cek filter udara." },
+    // (Tambahkan gradasi tipis untuk cakupan sensor kamera yang berbeda)
+    { name: "Normal (Soft Tan)", rgb: [180, 145, 115], ind: "Warna tan lembut.", pen: "Mesin FI optimal.", sol: "Gunakan bahan bakar oktan tepat." },
+    { name: "Normal (Brick Tone)", rgb: [160, 125, 105], ind: "Warna bata tipis.", pen: "Kondisi kerja stabil.", sol: "Busi bekerja di suhu ideal." },
+    { name: "Normal (Sandy Brown)", rgb: [185, 155, 130], ind: "Coklat pasir.", pen: "Sistem PGM-FI presisi.", sol: "Lanjutkan perawatan." },
+    { name: "Normal (Earth Brown)", rgb: [150, 115, 90], ind: "Coklat tanah cerah.", pen: "Kualitas pembakaran OK.", sol: "Bersihkan area busi." },
+    { name: "Normal (Dusty Tan)", rgb: [172, 138, 108], ind: "Tan berdebu.", pen: "Mesin standar pabrik.", sol: "Check gap busi." },
+    { name: "Normal (Light Grey)", rgb: [160, 160, 155], ind: "Abu-abu muda sehat.", pen: "Bahan bakar sangat bersih.", sol: "Kondisi sangat baik." },
+    { name: "Normal (Beige Tone)", rgb: [190, 165, 140], ind: "Warna krem tan.", pen: "Pembakaran efisien.", sol: "Pertahankan." },
+    { name: "Normal (Mocha)", rgb: [145, 110, 85], ind: "Coklat moka.", pen: "Temperatur kerja merata.", sol: "Service berkala." },
+    { name: "Normal (Oatmeal)", rgb: [182, 158, 135], ind: "Warna gandum cerah.", pen: "Sensor O2 bekerja baik.", sol: "Check-up standar." },
+    { name: "Normal (Pale Brown)", rgb: [178, 142, 112], ind: "Coklat pucat sehat.", pen: "Settingan standar.", sol: "Aman digunakan." },
+    { name: "Normal (Matte Brown)", rgb: [168, 135, 105], ind: "Coklat doff.", pen: "Residu pembakaran minimal.", sol: "Normal." },
+    { name: "Normal (Copper Tint)", rgb: [174, 134, 98], ind: "Coklat tembaga.", pen: "Suhu mesin stabil.", sol: "Lanjutkan." },
+    { name: "Normal (Khaki Brown)", rgb: [162, 132, 102], ind: "Coklat khaki.", pen: "Aliran bensin lancar.", sol: "OK." },
+    { name: "Normal (Pebble)", rgb: [158, 138, 118], ind: "Warna kerikil abu.", pen: "Pembersihan diri busi aktif.", sol: "Bagus." },
+    { name: "Normal (Classic Tan)", rgb: [171, 139, 109], ind: "Tan klasik.", pen: "Standar Honda.", sol: "Siap pakai." },
 
+    // --- KELOMPOK CARBON FOULING (HITAM KERING) - 15 VARIASI ---
+    { name: "Carbon (Light)", rgb: [65, 65, 65], ind: "Hitam tipis.", pen: "Campuran mulai boros.", sol: "Cek filter udara." },
+    { name: "Carbon (Dry Soot)", rgb: [50, 50, 50], ind: "Jelaga kering.", pen: "AFR kaya (Rich).", sol: "Setel ulang karbu/FI." },
+    { name: "Carbon (Standard)", rgb: [45, 45, 45], ind: "Hitam pekat kering.", pen: "Banyak sisa karbon.", sol: "Bersihkan injektor." },
+    { name: "Carbon (Matte Black)", rgb: [40, 40, 40], ind: "Hitam doff tebal.", pen: "Pembakaran tidak tuntas.", sol: "Cek busi & koil." },
+    { name: "Carbon (Charcoal)", rgb: [35, 35, 35], ind: "Warna arang.", pen: "Filter udara kotor.", sol: "Ganti filter udara." },
+    { name: "Carbon (Dark Ash)", rgb: [55, 55, 55], ind: "Abu gelap berkarbon.", pen: "Sensor EOT rusak.", sol: "Scan sensor EOT." },
+    { name: "Carbon (Deep Soot)", rgb: [30, 30, 30], ind: "Jelaga sangat tebal.", pen: "Injektor bocor.", sol: "Service injektor." },
+    { name: "Carbon (Velvet Black)", rgb: [25, 25, 25], ind: "Hitam beludru.", pen: "Bensin berlebih.", sol: "Reset ECU." },
+    { name: "Carbon (Grayish Black)", rgb: [70, 70, 70], ind: "Hitam keabuan.", pen: "Pengapian lemah.", sol: "Cek kabel busi." },
+    { name: "Carbon (Fouled 1)", rgb: [48, 48, 48], ind: "Busi mulai mati.", pen: "Misfire.", sol: "Ganti busi." },
+    { name: "Carbon (Fouled 2)", rgb: [42, 42, 42], ind: "Hambatan tinggi.", pen: "Kerak karbon.", sol: "Bersihkan." },
+    { name: "Carbon (Rich Mixture)", rgb: [38, 38, 38], ind: "Terlalu boros.", pen: "Settingan salah.", sol: "Kalibrasi ulang." },
+    { name: "Carbon (Smoky Black)", rgb: [52, 52, 52], ind: "Hitam asap.", pen: "Banyak sisa bahan bakar.", sol: "Checkup." },
+    { name: "Carbon (Graphite)", rgb: [58, 58, 58], ind: "Warna grafit.", pen: "Sering lari pelan.", sol: "Geber motor sesekali." },
+    { name: "Carbon (Dead Spark)", rgb: [32, 32, 32], ind: "Busi mati total.", pen: "Loncatan api hilang.", sol: "Ganti baru." },
+
+    // --- KELOMPOK OIL FOULING (HITAM BASAH/GLOSSY) - 15 VARIASI ---
+    { name: "Oil (Wet)", rgb: [20, 20, 20], ind: "Hitam basah.", pen: "Oli masuk ke mesin.", sol: "Cek seal klep." },
+    { name: "Oil (Glossy)", rgb: [10, 10, 10], ind: "Hitam mengkilap.", pen: "Ring piston lemah.", sol: "Turun mesin." },
+    { name: "Oil (Jet Black)", rgb: [5, 5, 5], ind: "Hitam pekat basah.", pen: "Oli membanjiri busi.", sol: "Overhaul." },
+    { name: "Oil (Sludge)", rgb: [15, 15, 15], ind: "Lumpur oli.", pen: "Oli rembes.", sol: "Ganti ring piston." },
+    { name: "Oil (Greasy)", rgb: [25, 25, 25], ind: "Berminyak.", pen: "Kompresi bocor.", sol: "Cek kompresi." },
+    { name: "Oil (Brim)", rgb: [12, 12, 12], ind: "Basah oli merata.", pen: "Oli terbakar.", sol: "Wajib service besar." },
+    { name: "Oil (Deep Gloss)", rgb: [8, 8, 8], ind: "Sangat mengkilap.", pen: "Kebocoran parah.", sol: "Jangan dipaksa jalan." },
+    { name: "Oil (Heavy)", rgb: [3, 3, 3], ind: "Oli tebal.", pen: "Kerusakan serius.", sol: "Turun mesin total." },
+    { name: "Oil (Dark Tint)", rgb: [22, 22, 22], ind: "Warna oli kotor.", pen: "Penyekat oli rusak.", sol: "Ganti seal." },
+    { name: "Oil (Viscous)", rgb: [18, 18, 18], ind: "Cairan kental.", pen: "Oli mesin masuk.", sol: "Check-up internal." },
+    { name: "Oil (Wet Soot)", rgb: [28, 28, 28], ind: "Campuran oli & karbon.", pen: "Bensin & oli terbakar.", sol: "Service total." },
+    { name: "Oil (Lubricant Leak)", rgb: [14, 14, 14], ind: "Bocoran pelumas.", pen: "Masalah mekanis.", sol: "Perbaikan." },
+    { name: "Oil (Slick)", rgb: [11, 11, 11], ind: "Licin oli.", pen: "Seal katup aus.", sol: "Ganti seal klep." },
+    { name: "Oil (Tar Black)", rgb: [6, 6, 6], ind: "Hitam aspal.", pen: "Oli lama mengendap.", sol: "Bersihkan ruang bakar." },
+    { name: "Oil (Gooey)", rgb: [16, 16, 16], ind: "Lengket.", pen: "Residu oli parah.", sol: "Overhaul mesin." },
+
+    // --- KELOMPOK LEAN & OVERHEAT (PUTIH/CERAH) - 20 VARIASI ---
+    { name: "Lean (White)", rgb: [220, 220, 220], ind: "Putih bersih.", pen: "Campuran terlalu irit.", sol: "Cek tekanan fuel pump." },
+    { name: "Lean (Dry White)", rgb: [230, 230, 230], ind: "Putih kering.", pen: "Bensin kurang.", sol: "Cek injektor." },
+    { name: "Lean (Pale)", rgb: [210, 210, 210], ind: "Pucat.", pen: "AFR di atas 15:1.", sol: "Reset settingan FI." },
+    { name: "Overheat (Blistered)", rgb: [240, 240, 240], ind: "Putih melepuh.", pen: "Suhu sangat tinggi.", sol: "Ganti busi tipe dingin." },
+    { name: "Overheat (Chalky)", rgb: [245, 245, 245], ind: "Putih kapur.", pen: "Radiator bermasalah.", sol: "Cek cairan radiator." },
+    { name: "Overheat (Eroded)", rgb: [250, 250, 250], ind: "Putih mengkilap.", pen: "Elektroda terkikis.", sol: "Ganti busi baru segera." },
+    { name: "Overheat (Snow White)", rgb: [255, 255, 255], ind: "Sangat putih.", pen: "Bahaya detonasi.", sol: "Cek oktan bensin." },
+    { name: "Overheat (Bone)", rgb: [235, 235, 235], ind: "Warna tulang.", pen: "Mesin terlalu panas.", sol: "Pendinginan bermasalah." },
+    { name: "Lean (Ivory)", rgb: [225, 225, 215], ind: "Warna gading.", pen: "Irit bensin.", sol: "Check intake manifold." },
+    { name: "Lean (Silverish)", rgb: [205, 205, 205], ind: "Perak pucat.", pen: "Suplai bensin tidak stabil.", sol: "Check fuel strainer." },
+    { name: "Overheat (Glazed)", rgb: [242, 242, 230], ind: "Putih kekuningan.", pen: "Temperatur ekstrim.", sol: "Pakai busi kode lebih dingin." },
+    { name: "Overheat (Scorched)", rgb: [238, 238, 238], ind: "Hangus putih.", pen: "Heat range salah.", sol: "Ganti busi." },
+    { name: "Overheat (High Temp)", rgb: [248, 248, 240], ind: "Suhu kritis.", pen: "Kipas radiator mati.", sol: "Perbaiki pendingin." },
+    { name: "Lean (Vacuum Leak)", rgb: [218, 218, 218], ind: "Kebocoran udara.", pen: "Intake bocor.", sol: "Cek paking intake." },
+    { name: "Lean (Fuel Starvation)", rgb: [222, 222, 222], ind: "Kurang bensin.", pen: "Filter bensin mampet.", sol: "Ganti filter bensin." },
+    { name: "Overheat (Melt Warning)", rgb: [252, 252, 252], ind: "Hampir meleleh.", pen: "Mesin dipaksa.", sol: "Istirahatkan mesin." },
+    { name: "Lean (Thin White)", rgb: [228, 228, 228], ind: "Putih tipis.", pen: "Bensin minimal.", sol: "Cek settingan." },
+    { name: "Overheat (Pearly)", rgb: [246, 246, 246], ind: "Putih mutiara.", pen: "Pemanasan berlebih.", sol: "Cek sirkulasi air." },
+    { name: "Lean (Clean Burn)", rgb: [212, 212, 212], ind: "Sangat bersih.", pen: "Settingan irit.", sol: "Normal jika untuk irit." },
+    { name: "Overheat (Final)", rgb: [254, 254, 254], ind: "Kritis.", pen: "Mesin bahaya.", sol: "Check total." },
+
+    // --- KELOMPOK ASH & DEPOSITS (ABU-ABU/KREM) - 15 VARIASI ---
+    { name: "Ash (Krem)", rgb: [190, 180, 160], ind: "Kerak krem.", pen: "Aditif oli terbakar.", sol: "Ganti merek oli." },
+    { name: "Ash (Grey)", rgb: [160, 160, 160], ind: "Abu-abu kapur.", pen: "Bensin kualitas rendah.", sol: "Pindah SPBU." },
+    { name: "Ash (Sand)", rgb: [200, 190, 170], ind: "Kerak pasir.", pen: "Banyak residu.", sol: "Ganti busi." },
+    { name: "Ash (Lumpy)", rgb: [180, 175, 165], ind: "Gumpalan abu.", pen: "Oli ikut terbakar.", sol: "Cek oli mesin." },
+    { name: "Ash (White Ash)", rgb: [205, 205, 195], ind: "Abu putih.", pen: "Deposit kalsium.", sol: "Ganti oli." },
+    { name: "Ash (Dusty)", rgb: [155, 155, 150], ind: "Abu berdebu.", pen: "Residu aditif.", sol: "Bersihkan busi." },
+    { name: "Ash (Cement)", rgb: [145, 145, 140], ind: "Abu semen.", pen: "Pembakaran kotor.", sol: "Ganti busi." },
+    { name: "Ash (Cloudy)", rgb: [175, 175, 170], ind: "Abu awan.", pen: "Sisa bensin.", sol: "Cek kualitas bensin." },
+    { name: "Ash (Tan Ash)", rgb: [185, 175, 155], ind: "Abu tan.", pen: "Aditif pembersih.", sol: "Normal." },
+    { name: "Ash (Beige)", rgb: [195, 185, 165], ind: "Abu krem cerah.", pen: "Deposit mineral.", sol: "Ganti oli." },
+    { name: "Ash (Salt)", rgb: [215, 210, 200], ind: "Kerak garam.", pen: "Bensin buruk.", sol: "Kuras tangki." },
+    { name: "Ash (Granular)", rgb: [150, 150, 145], ind: "Butiran abu.", pen: "Banyak kotoran.", sol: "Ganti busi." },
+    { name: "Ash (Muddy)", rgb: [135, 135, 130], ind: "Abu keruh.", pen: "Oli & bensin kotor.", sol: "Service." },
+    { name: "Ash (Pale Grey)", rgb: [188, 188, 182], ind: "Abu pucat.", pen: "Residu minimal.", sol: "OK." },
+    { name: "Ash (Fossil)", rgb: [168, 168, 162], ind: "Abu tua.", pen: "Kerak menahun.", sol: "Wajib ganti." },
+
+    // --- KELOMPOK LEAD & GLAZING (KUNING/MERAH/WARNA-WARNI) - 15 VARIASI ---
+    { name: "Lead (Yellow)", rgb: [140, 120, 60], ind: "Kuning kusam.", pen: "Bensin timbal.", sol: "Kuras tangki." },
+    { name: "Lead (Reddish)", rgb: [130, 80, 50], ind: "Merah bata.", pen: "Zat aditif berlebih.", sol: "Ganti SPBU." },
+    { name: "Glazing (Shiny)", rgb: [150, 130, 70], ind: "Mengkilap kuning.", pen: "Suhu naik tiba-tiba.", sol: "Ganti busi." },
+    { name: "Lead (Gold)", rgb: [155, 140, 80], ind: "Kuning emas kusam.", pen: "Sulfur tinggi.", sol: "Cek bensin." },
+    { name: "Lead (Mustard)", rgb: [145, 135, 90], ind: "Kuning mustard.", pen: "Residu oktan booster.", sol: "Hentikan aditif." },
+    { name: "Lead (Rusty)", rgb: [120, 70, 40], ind: "Berkarat.", pen: "Air di bensin.", sol: "Kuras tangki." },
+    { name: "Glazing (Amber)", rgb: [135, 115, 65], ind: "Warna amber.", pen: "Deposit kaca.", sol: "Ganti busi baru." },
+    { name: "Glazing (Bronze)", rgb: [125, 105, 55], ind: "Warna perunggu.", pen: "Overheat sesaat.", sol: "Ganti busi." },
+    { name: "Lead (Brownish Red)", rgb: [110, 60, 45], ind: "Merah kecoklatan.", pen: "Zat besi bensin.", sol: "Ganti bensin." },
+    { name: "Lead (Dull Gold)", rgb: [148, 128, 78], ind: "Emas kusam.", pen: "Kontaminasi.", sol: "Service." },
+    { name: "Lead (Copper)", rgb: [152, 92, 62], ind: "Warna tembaga.", pen: "Zat kimia bensin.", sol: "Kuras bensin." },
+    { name: "Lead (Ochre)", rgb: [138, 118, 58], ind: "Warna oker.", pen: "Timbal tinggi.", sol: "Ganti bensin." },
+    { name: "Glazing (Transparent)", rgb: [142, 122, 82], ind: "Kuning bening.", pen: "Kerak mencair.", sol: "Ganti busi." },
+    { name: "Glazing (Glassy)", rgb: [158, 138, 98], ind: "Seperti kaca.", pen: "Suhu ekstrim.", sol: "Cek cooling." },
+    { name: "Lead (Dirty Yellow)", rgb: [146, 136, 106], ind: "Kuning kotor.", pen: "Bensin oplosan.", sol: "Kuras bensin." }
+];
     const video = document.getElementById('video');
     const canvas = document.getElementById('canvas');
     const snapBtn = document.getElementById('snap');
@@ -176,3 +277,4 @@
 </script>
 </body>
 </html>
+
