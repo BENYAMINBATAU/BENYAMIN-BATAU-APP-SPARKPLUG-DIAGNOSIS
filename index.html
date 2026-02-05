@@ -3,49 +3,63 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Expert Busi Scanner HD - SMKN 1 Sumarorong</title>
+    <title>BENYAMIN BATAU APP - Expert Busi Scanner</title>
     <style>
         :root { --bg: #020617; --gold: #fbbf24; --text: #f8fafc; --accent: #3b82f6; --success: #10b981; }
         body { font-family: 'Segoe UI', Roboto, sans-serif; background: var(--bg); color: var(--text); margin: 0; overflow-x: hidden; }
         
+        /* Branding Header */
+        .app-header {
+            background: linear-gradient(to bottom, #1e293b, #020617);
+            padding: 15px; text-align: center; border-bottom: 2px solid var(--gold);
+        }
+        .app-header h1 { margin: 0; font-size: 1.2rem; letter-spacing: 2px; color: var(--gold); font-weight: 900; }
+        .app-header p { margin: 2px 0 0; font-size: 0.6rem; opacity: 0.7; letter-spacing: 1px; }
+
         /* Viewport Kamera Full HD */
-        #viewport { position: relative; width: 100vw; height: 60vh; background: #000; border-bottom: 4px solid var(--gold); }
+        #viewport { position: relative; width: 100vw; height: 50vh; background: #000; border-bottom: 2px solid #334155; }
         #video { width: 100%; height: 100%; object-fit: cover; }
         
         /* Overlay Pemandu Makro */
         .overlay { position: absolute; inset: 0; pointer-events: none; display: flex; align-items: center; justify-content: center; }
         .target-box { 
-            width: 70px; height: 70px; border: 2px dashed var(--gold); 
+            width: 80px; height: 80px; border: 2px dashed var(--gold); 
             background: rgba(251, 191, 36, 0.1); position: relative;
-            box-shadow: 0 0 0 5000px rgba(0,0,0,0.5);
+            box-shadow: 0 0 0 5000px rgba(0,0,0,0.6);
         }
         .target-box::after {
-            content: "POSISIKAN INSULATOR DI SINI";
-            position: absolute; bottom: -25px; left: 50%; transform: translateX(-50%);
-            font-size: 9px; color: var(--gold); font-weight: bold; white-space: nowrap;
+            content: "FOCUS AREA: INSULATOR";
+            position: absolute; bottom: -22px; left: 50%; transform: translateX(-50%);
+            font-size: 8px; color: var(--gold); font-weight: bold; white-space: nowrap;
         }
 
         /* Panel Diagnosa */
         .ui-panel { padding: 15px; box-sizing: border-box; }
         .btn {
-            background: var(--gold); color: #000; border: none; padding: 15px;
+            background: var(--gold); color: #000; border: none; padding: 16px;
             width: 100%; border-radius: 12px; font-weight: 900; font-size: 1rem; cursor: pointer;
-            box-shadow: 0 4px 10px rgba(251, 191, 36, 0.3);
+            box-shadow: 0 4px 15px rgba(251, 191, 36, 0.2); transition: 0.3s;
         }
+        .btn:active { transform: scale(0.98); }
         
-        #result { display: none; margin-top: 10px; padding-bottom: 30px; }
-        .res-header { display: flex; gap: 15px; margin-bottom: 15px; align-items: center; background: #1e293b; padding: 12px; border-radius: 15px; }
-        .color-preview { width: 60px; height: 60px; border-radius: 12px; border: 2px solid #fff; flex-shrink: 0; }
+        #result { display: none; margin-top: 5px; padding-bottom: 40px; }
+        .res-header { display: flex; gap: 15px; margin-bottom: 12px; align-items: center; background: #1e293b; padding: 15px; border-radius: 18px; border: 1px solid #334155; }
+        .color-preview { width: 65px; height: 65px; border-radius: 14px; border: 2px solid #fff; flex-shrink: 0; box-shadow: 0 0 10px rgba(0,0,0,0.5); }
         
-        .diag-card { background: #111827; padding: 15px; border-radius: 12px; margin-bottom: 10px; border-left: 5px solid var(--accent); }
-        .diag-card label { font-size: 0.7rem; color: var(--gold); font-weight: bold; display: block; margin-bottom: 5px; text-transform: uppercase; }
-        .diag-card p { margin: 0; font-size: 0.85rem; line-height: 1.5; color: #e2e8f0; text-align: justify; }
+        .diag-card { background: #0f172a; padding: 15px; border-radius: 14px; margin-bottom: 10px; border-left: 5px solid var(--accent); }
+        .diag-card label { font-size: 0.7rem; color: var(--gold); font-weight: 800; display: block; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 1px; }
+        .diag-card p { margin: 0; font-size: 0.85rem; line-height: 1.5; color: #f1f5f9; text-align: justify; }
         
-        .fix-card { border-left-color: var(--success); background: #064e3b33; }
+        .fix-card { border-left-color: var(--success); background: #064e3b22; }
         canvas { display: none; }
     </style>
 </head>
 <body>
+
+<div class="app-header">
+    <h1>BENYAMIN BATAU APP</h1>
+    <p>ADVANCED SPARK PLUG ANALYZER • SMKN 1 SUMARORONG</p>
+</div>
 
 <div id="viewport">
     <video id="video" autoplay playsinline></video>
@@ -53,85 +67,85 @@
 </div>
 
 <div class="ui-panel">
-    <button id="snap" class="btn">AMBIL FOTO & ANALISIS</button>
+    <button id="snap" class="btn">MULAI ANALISIS WARNA</button>
 
     <div id="result">
         <div class="res-header">
             <div id="resCol" class="color-preview"></div>
             <div>
-                <h3 id="resName" style="margin:0; color:var(--gold); font-size: 1.1rem;">-</h3>
-                <small id="resHex" style="opacity:0.6; font-family: monospace;"></small>
+                <h3 id="resName" style="margin:0; color:var(--gold); font-size: 1.1rem; text-transform: uppercase;">-</h3>
+                <small id="resHex" style="opacity:0.6; font-family: monospace; font-size: 0.7rem;"></small>
             </div>
         </div>
 
-        <div class="diag-card"><label>Kondisi Ruang Bakar</label><p id="resInd">-</p></div>
-        <div class="diag-card"><label>Analisis Penyebab</label><p id="resPen">-</p></div>
-        <div class="diag-card fix-card"><label>Langkah Perbaikan Teknis</label><p id="resSol">-</p></div>
+        <div class="diag-card"><label>Hasil Diagnosa Kondisi</label><p id="resInd">-</p></div>
+        <div class="diag-card"><label>Analisis Penyebab Teknis</label><p id="resPen">-</p></div>
+        <div class="diag-card fix-card"><label>Rekomendasi Perbaikan TSM</label><p id="resSol">-</p></div>
         
-        <button class="btn" style="background:#475569; color:white; margin-top:10px;" onclick="resetScan()">SCAN ULANG</button>
+        <button class="btn" style="background:#334155; color:white; margin-top:10px;" onclick="resetScan()">ULANGI PEMINDAIAN</button>
     </div>
 </div>
 
 <canvas id="canvas"></canvas>
 
 <script>
-    // LIBRARY DATABASE WARNA DENGAN PENJELASAN MENDALAM
+    // KODE AKURASI WARNA & DATABASE ANALISIS (FINAL REVISION)
     const LIBRARY = [
         { 
-            name: "NORMAL (OPTIMAL)", 
+            name: "Normal & Optimal", 
             rgb: [188, 150, 120], 
-            ind: "Kondisi ideal. Ujung insulator berwarna coklat muda keabu-abuan. Ini menandakan efisiensi termal mesin berada pada titik puncak.", 
-            pen: "Campuran bensin dan udara tepat (Stoikiometri), waktu pengapian presisi, dan pemilihan tingkat panas busi sudah sesuai dengan spesifikasi mesin.", 
-            sol: "Lakukan perawatan berkala saja. Bersihkan drat busi dan cek celah (gap) elektroda menggunakan feeler gauge (standar 0.7-0.9mm)."
+            ind: "Insulator berwarna coklat muda (tan) atau abu-abu. Elektroda bersih tanpa tumpukan kerak ekstrem. Menandakan efisiensi volumetrik dan termal mesin sangat baik.", 
+            pen: "Perbandingan udara dan bahan bakar (AFR) berada pada skala ideal 14.7:1. Sistem pengapian meledakkan campuran tepat pada waktunya (Ignition Timing OK).", 
+            sol: "Pertahankan settingan. Bersihkan drat busi agar transfer panas ke kepala silinder lancar. Cek celah elektroda (Gap) setiap 4.000 KM."
         },
         { 
-            name: "CARBON FOULING (KERAK KERING)", 
-            rgb: [45, 45, 45], 
-            ind: "Terdapat lapisan karbon hitam kering dan kusam pada insulator. Hal ini menyebabkan arus bocor dan motor sulit dihidupkan.", 
-            pen: "Campuran terlalu kaya (boros), filter udara tersumbat, atau mesin terlalu sering beroperasi pada putaran rendah/jarak pendek.", 
-            sol: "Bersihkan atau ganti filter udara. Setel ulang sekrup udara (Air Screw) pada karburator atau cek sensor MAP/O2 pada sistem injeksi. Gunakan busi dengan tingkat panas lebih tinggi (Hot Type)."
+            name: "Carbon Fouling (Boros)", 
+            rgb: [40, 40, 40], 
+            ind: "Insulator tertutup jelaga hitam kering. Hal ini mengakibatkan hambatan tinggi sehingga percikan api melemah (Misfire).", 
+            pen: "Bensin terlalu dominan (Rich Mixture). Bisa disebabkan oleh filter udara tersumbat, sensor EOT bermasalah, atau injektor bocor/menetes.", 
+            sol: "Servis sistem injeksi/karburator. Cek filter udara dan bersihkan intake manifold. Gunakan busi dengan tingkat panas lebih tinggi jika sering digunakan jarak dekat."
         },
         { 
-            name: "OIL FOULING (KERAK BASAH)", 
+            name: "Oil Fouling (Bocor Oli)", 
             rgb: [15, 15, 15], 
-            ind: "Ujung busi basah oleh oli mesin. Menandakan oli ikut terbakar di ruang kompresi yang dapat merusak katalisator knalpot.", 
-            pen: "Kebocoran oli melalui ring piston yang sudah lemah, dinding silinder baret, atau seal katup (valve seal) yang sudah mengeras.", 
-            sol: "Lakukan pengecekan tekanan kompresi. Segera lakukan penggantian ring piston atau seal katup sebelum kerusakan merembet ke kruk as."
+            ind: "Busi hitam pekat, basah, dan licin karena oli mesin. Ujung busi biasanya tercium bau oli terbakar.", 
+            pen: "Oli masuk ke ruang bakar melalui seal klep yang mengeras atau ring piston yang sudah aus/lemah.", 
+            sol: "Lakukan tes kompresi. Wajib melakukan perbaikan mesin (overhaul) untuk mengganti komponen penyekat oli. Membersihkan busi saja tidak akan menyelesaikan masalah."
         },
         { 
-            name: "OVERHEATING (KEPANASAN EXTREM)", 
-            rgb: [245, 245, 245], 
-            ind: "Insulator berwarna putih pucat dan tampak melepuh. Elektroda tampak terkikis atau membulat secara tidak wajar.", 
-            pen: "Penggunaan bahan bakar oktan rendah, sistem pendinginan (radiator/kipas) bermasalah, atau waktu pengapian terlalu maju.", 
-            sol: "Ganti ke bensin oktan lebih tinggi. Cek sistem pendingin. Gunakan busi tipe dingin (angka lebih besar, misal dari CPR7 ke CPR9)."
+            name: "Overheating (Ganti Oktan)", 
+            rgb: [248, 248, 248], 
+            ind: "Ujung insulator berwarna putih mengkilap dan melepuh. Elektroda samping tampak menipis atau meleleh (erosion).", 
+            pen: "Suhu ruang bakar terlalu panas akibat nilai oktan bensin terlalu rendah atau pemilihan kode busi yang terlalu panas (Heat Range salah).", 
+            sol: "Ganti ke bensin oktan lebih tinggi (min. Pertamax). Gunakan busi tipe dingin (misal: naik dari kode 6 ke 7 atau 8). Cek sirkulasi radiator atau pendingin udara."
         },
         { 
-            name: "ASH DEPOSITS (KERAK ABU)", 
-            rgb: [175, 175, 175], 
-            ind: "Terdapat tumpukan kerak berwarna putih/kuning menyerupai abu pada elektroda massa. Kerak ini bisa menjadi titik panas (hot spot).", 
-            pen: "Aditif dari oli mesin atau bahan bakar tidak terbakar sempurna. Sering terjadi jika menggunakan oli berkualitas rendah.", 
-            sol: "Ganti merek oli mesin dengan standar API/JASO yang lebih baik. Bersihkan ruang bakar menggunakan cairan Carbon Cleaner melalui lubang busi."
+            name: "Detonasi (Pitting Damage)", 
+            rgb: [205, 205, 205], 
+            ind: "Muncul bintik-bintik kasar atau pecah-pecah kecil pada keramik insulator. Elektroda massa tampak seperti bekas hantaman benda tumpul.", 
+            pen: "Terjadi knocking (ngelitik) parah. Ledakan terjadi sebelum busi memercikkan api karena deposit karbon di piston sudah membara.", 
+            sol: "Gunakan cairan Carbon Cleaner untuk membersihkan mahkota piston. Setel ulang celah katup dan pastikan timing pengapian tidak terlalu maju."
         },
         { 
-            name: "DETONASI (NGELITIK/KNOCKING)", 
-            rgb: [210, 210, 210], 
-            ind: "Insulator retak atau tampak bintik-bintik kecil seperti bekas tembakan (pitting) pada elektroda. Sangat berbahaya bagi piston.", 
-            pen: "Ledakan tidak terkendali di ruang bakar akibat tekanan kompresi terlalu tinggi atau bensin basi.", 
-            sol: "Gunakan bahan bakar oktan tinggi. Setel ulang timing pengapian. Cek apakah ada kerak karbon berlebih di mahkota piston yang meningkatkan rasio kompresi."
+            name: "Deposit Abu (Ash)", 
+            rgb: [170, 170, 170], 
+            ind: "Muncul tumpukan material berwarna krem atau putih kusam menyerupai kapur di ujung busi.", 
+            pen: "Pembakaran zat aditif dari oli mesin atau bensin kualitas rendah yang tidak habis terbakar sempurna.", 
+            sol: "Kuras tangki bensin. Gunakan oli mesin dengan standar JASO MB/MA yang asli. Jika kerak terlalu tebal, busi wajib diganti karena akan memicu Pre-Ignition."
         },
         { 
-            name: "GLAZING (KERAK KACA)", 
-            rgb: [130, 95, 65], 
-            ind: "Muncul lapisan kekuningan mengkilap seperti kaca. Lapisan ini konduktif dan akan mematikan percikan api saat beban tinggi.", 
-            pen: "Suhu mesin naik secara mendadak saat kecepatan tinggi, menyebabkan deposit kerak mencair dan membeku kembali menjadi kaca.", 
-            sol: "Busi tidak bisa dibersihkan. Wajib ganti busi baru. Hindari memaksa mesin di putaran tinggi secara mendadak jika kondisi mesin penuh kerak."
+            name: "Lead Fouling (Zat Timbal)", 
+            rgb: [145, 125, 90], 
+            ind: "Warna coklat kekuningan yang tampak rata menyelimuti keramik busi.", 
+            pen: "Sering menggunakan bahan bakar berkualitas rendah yang mengandung kadar sulfur atau timbal tinggi.", 
+            sol: "Pindah ke SPBU yang terpercaya. Busi ini biasanya menyebabkan motor mogok saat beban tinggi (akselerasi mendadak)."
         },
         { 
-            name: "BUSI BARU / LEAN", 
-            rgb: [230, 230, 230], 
-            ind: "Insulator masih putih bersih tanpa noda. Jika sudah dipakai lama tetap putih, berarti mesin cenderung terlalu kering (Lean).", 
-            pen: "Suplai bensin terlalu sedikit atau ada kebocoran udara (vakum) pada manifol.", 
-            sol: "Cek kerapatan intake manifol. Periksa tekanan pompa bahan bakar (Fuel Pump) pada motor injeksi (standar 294 kPa)."
+            name: "Busi Baru / Lean (Kering)", 
+            rgb: [235, 235, 235], 
+            ind: "Busi sangat bersih namun tampak kering kerontang. Menandakan campuran bensin kurang (irit ekstrem).", 
+            pen: "Kebocoran udara pada intake manifold atau tekanan fuel pump yang lemah (Fuel pressure drop).", 
+            sol: "Cek kerapatan sambungan intake. Jika motor injeksi, bersihkan filter bensin (fuel strainer) dan cek tekanan fuel pump (standar 42 psi)."
         }
     ];
 
@@ -149,7 +163,7 @@
             const track = stream.getVideoTracks()[0];
             const caps = track.getCapabilities();
             if (caps.torch) track.applyConstraints({ advanced: [{ torch: true }] });
-        } catch (e) { alert("Pastikan izin kamera diberikan."); }
+        } catch (e) { alert("Akses kamera ditolak."); }
     }
 
     snapBtn.onclick = () => {
@@ -158,10 +172,10 @@
         canvas.height = video.videoHeight;
         ctx.drawImage(video, 0, 0);
 
-        // Ambil area sampling 50x50 di tengah target box
+        // Sampling 40x40 pixel di tengah target box
         const x = canvas.width / 2;
         const y = canvas.height / 2;
-        const data = ctx.getImageData(x-25, y-25, 50, 50).data;
+        const data = ctx.getImageData(x-20, y-20, 40, 40).data;
 
         let r=0, g=0, b=0;
         for(let i=0; i<data.length; i+=4) { r += data[i]; g += data[i+1]; b += data[i+2]; }
@@ -181,7 +195,7 @@
 
         const hex = "#" + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1).toUpperCase();
         document.getElementById('resCol').style.backgroundColor = hex;
-        document.getElementById('resHex').innerText = `SENSING: ${hex} (R:${r} G:${g} B:${b})`;
+        document.getElementById('resHex').innerText = `SENSOR DATA: ${hex} | R:${r} G:${g} B:${b}`;
         document.getElementById('resName').innerText = match.name;
         document.getElementById('resInd').innerText = match.ind;
         document.getElementById('resPen').innerText = match.pen;
