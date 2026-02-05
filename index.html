@@ -20,14 +20,14 @@
         
         .overlay { position: absolute; inset: 0; pointer-events: none; display: flex; align-items: center; justify-content: center; }
         .target-box { 
-            width: 100px; height: 100px; border: 3px solid var(--gold); 
+            width: 70px; height: 70px; border: 3px solid var(--gold); 
             background: rgba(251, 191, 36, 0.05); position: relative;
             box-shadow: 0 0 0 5000px rgba(0,0,0,0.7);
         }
         .target-box::after {
-            content: "BIDIK BAGIAN KERAMIK (INSULATOR)";
-            position: absolute; bottom: -30px; left: 50%; transform: translateX(-50%);
-            font-size: 9px; color: var(--gold); font-weight: bold; white-space: nowrap;
+            content: "BIDIK AREA INSULATOR";
+            position: absolute; bottom: -25px; left: 50%; transform: translateX(-50%);
+            font-size: 8px; color: var(--gold); font-weight: bold; white-space: nowrap;
         }
 
         .ui-panel { padding: 15px; box-sizing: border-box; }
@@ -53,7 +53,7 @@
 
 <div class="app-header">
     <h1>BENYAMIN BATAU APP</h1>
-    <p>PRECISION SPARK PLUG ANALYZER • SMKN 1 SUMARORONG</p>
+    <p>PRECISION SPARK PLUG SENSOR • SMKN 1 SUMARORONG</p>
 </div>
 
 <div id="viewport">
@@ -62,7 +62,7 @@
 </div>
 
 <div class="ui-panel">
-    <button id="snap" class="btn">AMBIL DATA & ANALISIS PRESISI</button>
+    <button id="snap" class="btn">AMBIL DATA & ANALISIS WARNA</button>
 
     <div id="result">
         <div class="res-header">
@@ -73,9 +73,9 @@
             </div>
         </div>
 
-        <div class="diag-card"><label>Diagnosa</label><p id="resInd">-</p></div>
-        <div class="diag-card"><label>Analisis Mekanik</label><p id="resPen">-</p></div>
-        <div class="diag-card fix-card"><label>Solusi Perbaikan</label><p id="resSol">-</p></div>
+        <div class="diag-card"><label>Diagnosa Warna</label><p id="resInd">-</p></div>
+        <div class="diag-card"><label>Analisis Penyebab</label><p id="resPen">-</p></div>
+        <div class="diag-card fix-card"><label>Tindakan Perbaikan</label><p id="resSol">-</p></div>
         
         <button class="btn" style="background:#334155; color:white; margin-top:10px;" onclick="resetScan()">SCAN ULANG</button>
     </div>
@@ -84,15 +84,18 @@
 <canvas id="canvas"></canvas>
 
 <script>
-    // LIBRARY DENGAN KALIBRASI WARNA TSM PRO
+    // PERBENDAHARAAN WARNA TERKALIBRASI (10 KONDISI UTAMA)
     const LIBRARY = [
-        { name: "Normal (Ideal)", rgb: [175, 145, 115], ind: "Pembakaran sempurna. Insulator coklat muda merata.", pen: "Setelan AFR (Air Fuel Ratio) tepat pada 14.7:1.", sol: "Perawatan rutin setiap 4.000 KM." },
-        { name: "Carbon Fouling", rgb: [35, 35, 35], ind: "Deposit karbon hitam kering menyelimuti insulator.", pen: "Campuran terlalu boros atau filter udara mampet.", sol: "Bersihkan filter udara, cek sistem injeksi/karburator." },
-        { name: "Oil Fouling", rgb: [10, 10, 10], ind: "Busi basah oli, hitam pekat mengkilap.", pen: "Kebocoran pada ring piston atau seal katup.", sol: "Cek kompresi mesin, kemungkinan perlu turun mesin." },
-        { name: "Overheat", rgb: [240, 240, 240], ind: "Insulator putih pucat dan melepuh.", pen: "Nilai oktan terlalu rendah atau busi terlalu panas.", sol: "Ganti bensin oktan tinggi & gunakan busi tipe dingin." },
-        { name: "Ash Deposit", rgb: [165, 165, 165], ind: "Tumpukan abu kelabu atau kuning kusam.", pen: "Kualitas oli mesin buruk atau aditif bensin menumpuk.", sol: "Ganti merek oli yang sesuai spesifikasi API/JASO." },
-        { name: "Lead Fouling", rgb: [135, 115, 80], ind: "Coklat kekuningan tebal mengkilap.", pen: "Menggunakan bahan bakar bertimbal atau bensin kualitas rendah.", sol: "Kuras tangki, gunakan bahan bakar di SPBU resmi." },
-        { name: "Lean (Terlalu Irit)", rgb: [225, 220, 210], ind: "Busi sangat bersih/putih tanpa deposit sedikitpun.", pen: "Suplai bensin kurang, mesin cepat panas.", sol: "Cek tekanan Fuel Pump (Standar 294 kPa)." }
+        { name: "Normal (Optimal)", rgb: [175, 140, 110], ind: "Coklat muda/keabu-abuan. Pembakaran sangat efisien.", pen: "AFR Stoikiometri (14.7:1) & Ignition Timing tepat.", sol: "Perawatan rutin & cek celah busi (0.8mm - 0.9mm)." },
+        { name: "Carbon Fouling", rgb: [45, 45, 45], ind: "Hitam kering berjelaga. Arus listrik bocor melalui kerak.", pen: "Campuran boros, filter udara buntu, atau sering lari pelan.", sol: "Bersihkan filter udara, cek sensor EOT/ECT atau Injektor." },
+        { name: "Oil Fouling", rgb: [15, 15, 15], ind: "Hitam basah berminyak. Sangat sulit dihidupkan.", pen: "Kebocoran oli lewat ring piston atau seal katup.", sol: "Cek tekanan kompresi. Wajib ganti komponen internal mesin." },
+        { name: "Overheating", rgb: [245, 245, 245], ind: "Putih melepuh mengkilap. Elektroda terkikis.", pen: "Oktan bensin terlalu rendah atau busi tipe terlalu panas.", sol: "Ganti ke bensin oktan tinggi (92+) & gunakan busi tipe dingin." },
+        { name: "Ash Deposits", rgb: [170, 170, 160], ind: "Kerak abu berwarna krem/putih kapur.", pen: "Aditif oli mesin atau bensin kualitas rendah terbakar.", sol: "Ganti merek oli mesin ke standar JASO yang lebih baik." },
+        { name: "Lead Fouling", rgb: [130, 100, 60], ind: "Coklat kekuningan seperti lapisan kaca.", pen: "Penggunaan bensin bertimbal atau oplosan.", sol: "Kuras tangki bensin dan bersihkan ruang bakar." },
+        { name: "Lean (Terlalu Irit)", rgb: [215, 215, 215], ind: "Sangat bersih dan kering putih tanpa noda.", pen: "Suplai bensin kurang. Bahaya panas berlebih pada mesin.", sol: "Cek tekanan Fuel Pump (min. 294 kPa) & Intake Manifold." },
+        { name: "Detonasi (Knocking)", rgb: [195, 195, 195], ind: "Insulator retak atau ada bintik logam menempel.", pen: "Ledakan tidak terkendali (Ngelitik) karena deposit karbon.", sol: "Lakukan Gurah Mesin (Carbon Cleaning) di ruang bakar." },
+        { name: "Worn Out (Aus)", rgb: [160, 160, 160], ind: "Warna normal tapi elektroda sudah membulat/habis.", pen: "Masa pakai busi sudah lewat batas (Busi lama).", sol: "Ganti busi baru sesuai kode spesifikasi pabrikan." },
+        { name: "Glazing", rgb: [140, 110, 50], ind: "Warna kuning mengkilap (transparan).", pen: "Suhu mesin naik mendadak (High Load) saat mesin kotor.", sol: "Ganti busi baru, deposit ini tidak bisa dibersihkan." }
     ];
 
     const video = document.getElementById('video');
@@ -100,16 +103,13 @@
     const snapBtn = document.getElementById('snap');
     const resDiv = document.getElementById('result');
 
-    async function startHD() {
+    async function startCamera() {
         try {
             const stream = await navigator.mediaDevices.getUserMedia({ 
-                video: { facingMode: "environment", width: { ideal: 1920 }, height: { ideal: 1080 } } 
+                video: { facingMode: "environment", width: { ideal: 1280 }, height: { ideal: 720 } } 
             });
             video.srcObject = stream;
-            const track = stream.getVideoTracks()[0];
-            const caps = track.getCapabilities();
-            if (caps.torch) track.applyConstraints({ advanced: [{ torch: true }] });
-        } catch (e) { alert("Aktifkan izin kamera!"); }
+        } catch (e) { alert("Izin kamera diperlukan!"); }
     }
 
     snapBtn.onclick = () => {
@@ -118,49 +118,44 @@
         canvas.height = video.videoHeight;
         ctx.drawImage(video, 0, 0);
 
-        // Algoritma Multi-Point Sampling: Mengambil 5 titik (Tengah, Atas, Bawah, Kiri, Kanan)
-        const centerX = canvas.width / 2;
-        const centerY = canvas.height / 2;
-        const offset = 15;
-        const points = [
-            [centerX, centerY],
-            [centerX, centerY - offset],
-            [centerX, centerY + offset],
-            [centerX - offset, centerY],
-            [centerX + offset, centerY]
-        ];
+        const size = 40; 
+        const x = canvas.width / 2 - size / 2;
+        const y = canvas.height / 2 - size / 2;
+        const imgData = ctx.getImageData(x, y, size, size).data;
 
-        let totalR=0, totalG=0, totalB=0;
-        points.forEach(p => {
-            const d = ctx.getImageData(p[0]-5, p[1]-5, 10, 10).data;
-            let r=0, g=0, b=0;
-            for(let i=0; i<d.length; i+=4) { r+=d[i]; g+=d[i+1]; b+=d[i+2]; }
-            totalR += r/(d.length/4); totalG += g/(d.length/4); totalB += b/(d.length/4);
-        });
+        let r=0, g=0, b=0;
+        for(let i=0; i<imgData.length; i+=4) {
+            // Gamma Correction 2.2 untuk linearisasi sensor CMOS
+            r += Math.pow(imgData[i]/255, 2.2);
+            g += Math.pow(imgData[i+1]/255, 2.2);
+            b += Math.pow(imgData[i+2]/255, 2.2);
+        }
 
-        showResult(Math.round(totalR/5), Math.round(totalG/5), Math.round(totalB/5));
+        const count = imgData.length / 4;
+        const finalR = Math.round(Math.pow(r/count, 1/2.2) * 255);
+        const finalG = Math.round(Math.pow(g/count, 1/2.2) * 255);
+        const finalB = Math.round(Math.pow(b/count, 1/2.2) * 255);
+
+        analyzeColor(finalR, finalG, finalB);
     };
 
-    function showResult(r, g, b) {
+    function analyzeColor(r, g, b) {
         let match = LIBRARY[0];
         let minScore = Infinity;
 
         LIBRARY.forEach(item => {
-            // Weighted Euclidean Distance: Memberikan bobot lebih pada perbedaan warna
-            // untuk membedakan antara abu-abu (Ash) dan coklat (Normal) lebih akurat.
-            const dr = r - item.rgb[0];
-            const dg = g - item.rgb[1];
-            const db = b - item.rgb[2];
-            
-            // Penyesuaian Sensitivitas Spektrum Merah dan Hijau
-            const score = Math.sqrt(dr*dr*0.4 + dg*dg*0.4 + db*db*0.2);
-            
+            // Weighted Euclidean Distance (R:30%, G:59%, B:11%)
+            const score = Math.sqrt(
+                Math.pow(r - item.rgb[0], 2) * 0.30 +
+                Math.pow(g - item.rgb[1], 2) * 0.59 +
+                Math.pow(b - item.rgb[2], 2) * 0.11
+            );
             if(score < minScore) { minScore = score; match = item; }
         });
 
         const hex = "#" + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1).toUpperCase();
         document.getElementById('resCol').style.backgroundColor = hex;
-        document.getElementById('resHex').innerText = `SENSOR: ${hex} | R:${r} G:${g} B:${b}`;
+        document.getElementById('resHex').innerText = `CALIBRATED SENSOR: ${hex} | R:${r} G:${g} B:${b}`;
         document.getElementById('resName').innerText = match.name;
         document.getElementById('resInd').innerText = match.ind;
         document.getElementById('resPen').innerText = match.pen;
@@ -177,7 +172,7 @@
         video.play();
     }
 
-    window.onload = startHD;
+    window.onload = startCamera;
 </script>
 </body>
 </html>
