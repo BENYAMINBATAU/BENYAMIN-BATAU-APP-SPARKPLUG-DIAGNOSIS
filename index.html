@@ -762,5 +762,87 @@
 
     window.onload = startCamera;
 </script>
+    <script>
+/* =============================
+   CORE ANALYTICAL ENGINE
+   ============================= */
+
+// RGB → HSV (untuk hue, saturation, brightness)
+function rgbToHsv(r, g, b) {
+    r /= 255; g /= 255; b /= 255;
+    let max = Math.max(r, g, b), min = Math.min(r, g, b);
+    let h, s, v = max;
+    let d = max - min;
+
+    s = max === 0 ? 0 : d / max;
+
+    if (max === min) {
+        h = 0;
+    } else {
+        switch (max) {
+            case r: h = (g - b) / d + (g < b ? 6 : 0); break;
+            case g: h = (b - r) / d + 2; break;
+            case b: h = (r - g) / d + 4; break;
+        }
+        h *= 60;
+    }
+    return { h: Math.round(h), s: Math.round(s * 100), v: Math.round(v * 100) };
+}
+
+// Jarak warna (akurasi mekanik, bukan sekadar visual)
+function colorDistance(rgb1, rgb2) {
+    return Math.sqrt(
+        Math.pow(rgb1[0] - rgb2[0], 2) +
+        Math.pow(rgb1[1] - rgb2[1], 2) +
+        Math.pow(rgb1[2] - rgb2[2], 2)
+    );
+}
+
+// Cari kondisi paling mendekati
+function analyzeColor(rgb) {
+    let bestMatch = null;
+    let minDist = Infinity;
+
+    LIBRARY.forEach(item => {
+        const dist = colorDistance(rgb, item.rgb);
+        if (dist < minDist) {
+            minDist = dist;
+            bestMatch = item;
+        }
+    });
+
+    const hsv = rgbToHsv(rgb[0], rgb[1], rgb[2]);
+    const matchScore = Math.max(0, Math.round(100 - minDist));
+
+    return { ...bestMatch, hsv, matchScore };
+}
+</script>
+<script>
+function renderResult(result, rgb) {
+    document.getElementById("resCol").style.background = `rgb(${rgb.join(",")})`;
+    document.getElementById("resName").innerText = result.name;
+    document.getElementById("resInd").innerText = result.ind;
+    document.getElementById("resPen").innerText = result.pen;
+    document.getElementById("resSol").innerText = result.sol;
+    document.getElementById("resHex").innerText =
+        "#" + rgb.map(v => v.toString(16).padStart(2, "0")).join("").toUpperCase();
+
+    document.getElementById("brightness").innerText = result.hsv.v + "%";
+    document.getElementById("saturation").innerText = result.hsv.s + "%";
+    document.getElementById("hue").innerText = result.hsv.h + "°";
+    document.getElementById("matchScore").innerText = result.matchScore + "%";
+
+    document.getElementById("confidence").style.width = result.matchScore + "%";
+    document.getElementById("confText").innerText = "Akurasi analisis visual ±" + result.matchScore + "%";
+
+    const sev = document.getElementById("severity");
+    sev.className = "severity-indicator severity-" + result.severity;
+    sev.innerText = result.severity.toUpperCase();
+
+    document.getElementById("result").style.display = "block";
+}
+</script>
+
 </body>
 </html>
+
