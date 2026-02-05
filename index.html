@@ -3,45 +3,47 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Expert Spark Plug Scanner - SMKN 1 Sumarorong</title>
+    <title>Expert Busi Scanner - SMKN 1 Sumarorong</title>
     <style>
         :root { --bg: #0f172a; --card: #1e293b; --gold: #fbbf24; --blue: #3b82f6; --text: #f8fafc; }
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 15px; display: flex; justify-content: center; }
-        .card { width: 100%; max-width: 480px; background: var(--card); padding: 25px; border-radius: 30px; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5); border: 1px solid #334155; }
+        body { font-family: 'Inter', system-ui, sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 10px; overflow-x: hidden; }
+        .card { width: 100%; max-width: 500px; margin: auto; background: var(--card); padding: 20px; border-radius: 30px; box-shadow: 0 25px 50px rgba(0,0,0,0.5); border: 1px solid #334155; box-sizing: border-box; }
         
-        .header h1 { font-size: 1.5rem; color: var(--gold); margin: 0; text-transform: uppercase; font-weight: 900; font-style: italic; }
-        .header p { font-size: 0.75rem; color: #94a3b8; margin: 5px 0 20px 0; letter-spacing: 2px; }
+        .header h1 { font-size: 1.4rem; color: var(--gold); margin: 0; text-transform: uppercase; font-weight: 900; text-align: center; }
+        .header p { font-size: 0.7rem; color: #94a3b8; text-align: center; margin: 5px 0 15px 0; letter-spacing: 1px; }
 
-        /* Camera Box & Focus Target */
-        #viewport { 
-            width: 100%; height: 320px; background: #000; border-radius: 20px; 
-            margin-bottom: 20px; position: relative; overflow: hidden; border: 2px solid #475569;
+        /* Live Camera Container */
+        #camera-container { 
+            width: 100%; height: 350px; background: #000; border-radius: 20px; 
+            margin-bottom: 15px; position: relative; overflow: hidden; border: 2px solid #475569;
         }
-        #preview { width: 100%; height: 100%; object-fit: contain; display: none; }
-        .target-overlay {
+        #video { width: 100%; height: 100%; object-fit: cover; }
+        #photo-preview { width: 100%; height: 100%; object-fit: cover; display: none; position: absolute; top:0; left:0; }
+        
+        /* Overlay Fokus */
+        .focus-ring {
             position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
-            width: 80px; height: 80px; border: 2px dashed var(--gold); border-radius: 50%;
-            pointer-events: none; display: flex; align-items: center; justify-content: center;
+            width: 100px; height: 100px; border: 2px solid var(--gold); border-radius: 15px;
+            pointer-events: none; transition: 0.3s; box-shadow: 0 0 0 1000px rgba(0,0,0,0.3);
         }
-        .target-overlay::after { content: 'FOKUS INSULATOR'; font-size: 8px; color: var(--gold); margin-top: 100px; white-space: nowrap; font-weight: bold; }
+        .focus-ring::before { content: 'TEMPATKAN INSULATOR DI SINI'; position: absolute; bottom: -25px; left: 50%; transform: translateX(-50%); font-size: 8px; color: var(--gold); width: 150px; text-align: center; font-weight: bold; }
 
+        .controls { display: grid; grid-template-columns: 1fr; gap: 10px; }
         .btn { 
-            background: var(--gold); color: #000; padding: 18px; border-radius: 15px; 
-            font-weight: 800; cursor: pointer; width: 100%; border: none; font-size: 1rem;
-            box-shadow: 0 4px 15px rgba(251, 191, 36, 0.3); transition: 0.2s;
+            background: var(--gold); color: #000; padding: 16px; border-radius: 15px; 
+            font-weight: 800; cursor: pointer; border: none; font-size: 1rem; transition: 0.2s;
         }
-        .btn:active { transform: scale(0.96); }
+        .btn-blue { background: var(--blue); color: white; }
+        .btn:disabled { opacity: 0.5; cursor: not-allowed; }
 
         /* Result Section */
-        #res { margin-top: 25px; padding: 20px; background: #0f172a; border-radius: 20px; display: none; border: 1px solid #334155; text-align: left; }
-        .color-circle { width: 45px; height: 45px; border-radius: 12px; border: 2px solid #fff; flex-shrink: 0; }
-        .diag-header { display: flex; align-items: center; gap: 15px; margin-bottom: 15px; }
+        #res { margin-top: 20px; padding: 15px; background: #0f172a; border-radius: 20px; display: none; border-top: 4px solid var(--gold); }
+        .diag-header { display: flex; align-items: center; gap: 12px; margin-bottom: 15px; }
+        .color-sample { width: 50px; height: 50px; border-radius: 10px; border: 2px solid #fff; }
         
-        .box-info { background: #1e293b; padding: 12px; border-radius: 12px; margin-bottom: 10px; border-left: 4px solid var(--blue); }
-        .box-info label { display: block; font-size: 0.7rem; color: #94a3b8; font-weight: bold; text-transform: uppercase; margin-bottom: 4px; }
-        .box-info p { margin: 0; font-size: 0.9rem; line-height: 1.5; color: #e2e8f0; }
-        
-        .step-fix { border-left-color: var(--gold); background: rgba(251, 191, 36, 0.05); }
+        .box-info { background: #1e293b; padding: 10px; border-radius: 10px; margin-bottom: 8px; border-left: 3px solid var(--blue); }
+        .box-info label { display: block; font-size: 0.65rem; color: #94a3b8; font-weight: 700; text-transform: uppercase; }
+        .box-info p { margin: 3px 0 0 0; font-size: 0.85rem; color: #e2e8f0; }
         canvas { display: none; }
     </style>
 </head>
@@ -50,175 +52,135 @@
 <div class="card">
     <div class="header">
         <h1>BENYAMIN BATAU APP</h1>
-        <p>SMKN 1 SUMARORONG • TSM EXPERT SYSTEM</p>
+        <p>LAB TSM SMKN 1 SUMARORONG</p>
     </div>
 
-    <div id="viewport">
-        <div class="target-overlay" id="guideline"></div>
-        <img id="preview" alt="Busi">
-        <canvas id="scanCanvas"></canvas>
+    <div id="camera-container" onclick="requestAutoFocus()">
+        <video id="video" autoplay playsinline></video>
+        <img id="photo-preview">
+        <div class="focus-ring"></div>
     </div>
 
-    <input type="file" id="camera" accept="image/*" capture="camera" style="display:none">
-    <button class="btn" onclick="document.getElementById('camera').click()">AMBIL FOTO BUSI</button>
+    <div class="controls">
+        <button id="snap" class="btn">AMBIL & ANALISIS FOTO</button>
+        <button id="reset" class="btn btn-blue" style="display:none">ULANGI SCAN</button>
+    </div>
 
     <div id="res">
         <div class="diag-header">
-            <div id="colBox" class="color-circle"></div>
+            <div id="resCol" class="color-sample"></div>
             <div>
-                <div id="colName" style="font-weight:900; color:var(--gold); font-size: 1.1rem;">-</div>
-                <div id="colHex" style="font-size:0.7rem; color:#64748b; font-family:monospace;">HEX: #000000</div>
+                <div id="resName" style="font-weight:900; color:var(--gold); font-size: 1rem;">-</div>
+                <div id="resHex" style="font-size:0.6rem; color:#64748b; font-family:monospace;">HEX: #000000</div>
             </div>
         </div>
-
-        <div class="box-info">
-            <label>Analisis Kondisi</label>
-            <p id="txtIndikasi">-</p>
-        </div>
-        <div class="box-info">
-            <label>Kemungkinan Penyebab</label>
-            <p id="txtPenyebab">-</p>
-        </div>
-        <div class="box-info step-fix">
-            <label>Rekomendasi Perbaikan</label>
-            <p id="txtSolusi" style="color:var(--gold); font-weight:bold;">-</p>
-        </div>
+        <div class="box-info"><label>Analisis Kondisi</label><p id="resInd">-</p></div>
+        <div class="box-info"><label>Kemungkinan Penyebab</label><p id="resPen">-</p></div>
+        <div class="box-info" style="border-left-color:var(--gold)"><label>Tindakan Perbaikan</label><p id="resSol" style="color:var(--gold); font-weight:bold;">-</p></div>
     </div>
 </div>
 
+<canvas id="canvas"></canvas>
+
 <script>
-    // LIBRARY DATABASE WARNA BUSI (STANDARD NGK, DENSO, CHAMPION)
-    const BUSI_DB = [
-        {
-            name: "NORMAL (OPTIMAL)",
-            rgb: [210, 180, 140], hex: "#D2B48C",
-            indikasi: "Warna coklat muda / abu-abu (Tan Color). Pembakaran mesin sangat efisien.",
-            penyebab: "Campuran udara & bensin pas, waktu pengapian tepat, tingkat panas busi sesuai.",
-            solusi: "Kondisi sangat baik. Pertahankan perawatan rutin dan gunakan bensin kualitas stabil."
-        },
-        {
-            name: "BUSI BARU / MESIN DINGIN",
-            rgb: [240, 240, 240], hex: "#F0F0F0",
-            indikasi: "Insulator masih putih bersih. Belum ada deposit.",
-            penyebab: "Busi baru dipasang atau mesin hanya dihidupkan sebentar (belum mencapai suhu kerja).",
-            solusi: "Normal untuk komponen baru. Jalankan motor sekitar 15 menit untuk melihat pola pembakaran asli."
-        },
-        {
-            name: "TERLALU IRIT (LEAN)",
-            rgb: [255, 255, 255], hex: "#FFFFFF",
-            indikasi: "Putih bersih membara. Mesin cenderung cepat panas (Overheating).",
-            penyebab: "Campuran bensin terlalu sedikit, ada kebocoran udara di intake, atau spuyer mampet.",
-            solusi: "Bersihkan karburator/injektor, cek filter bensin, dan pastikan tidak ada kebocoran pada manifol."
-        },
-        {
-            name: "KERAK KARBON (DRY FOULING)",
-            rgb: [40, 40, 40], hex: "#282828",
-            indikasi: "Hitam kering berjelaga. Motor susah hidup di pagi hari.",
-            penyebab: "Campuran terlalu boros, filter udara sangat kotor, atau motor sering digunakan jarak pendek.",
-            solusi: "Bersihkan/ganti filter udara, servis karburator/injeksi. Gunakan busi dengan tingkat panas lebih tinggi."
-        },
-        {
-            name: "KERAK OLI (WET FOULING)",
-            rgb: [15, 15, 15], hex: "#0F0F0F",
-            indikasi: "Hitam basah dan berminyak. Keluar asap putih dari knalpot.",
-            penyebab: "Oli mesin masuk ke ruang bakar karena ring piston aus atau seal klep bocor.",
-            solusi: "Perlu bongkar mesin (Overhaul). Segera ganti ring piston dan seal klep untuk mencegah kerusakan silinder."
-        },
-        {
-            name: "OVERHEATING / PRE-IGNITION",
-            rgb: [220, 220, 220], hex: "#DCDCDC",
-            indikasi: "Insulator putih melepuh, elektroda tampak terkikis/meleleh.",
-            penyebab: "Oktan bensin terlalu rendah, pengapian terlalu maju, atau pendinginan mesin gagal.",
-            solusi: "Gunakan bensin oktan lebih tinggi (Pertamax/Turbo), cek radiator/kipas, dan gunakan busi 'Cold Type'."
-        },
-        {
-            name: "DEPOSIT ABU (ASH DEPOSIT)",
-            rgb: [180, 180, 180], hex: "#B4B4B4",
-            indikasi: "Tumpukan kerak berwarna kelabu/putih berpasir di ujung busi.",
-            penyebab: "Penggunaan oli samping berkualitas rendah (2-tak) atau aditif bensin yang tidak terbakar habis.",
-            solusi: "Ganti merek oli mesin/oli samping yang lebih berkualitas dan bersihkan kepala silinder."
-        },
-        {
-            name: "LEAD FOULING",
-            rgb: [100, 70, 40], hex: "#644628",
-            indikasi: "Warna coklat tua kekuningan/mengkilap seperti kaca (Glazing).",
-            penyebab: "Sisa timbal dari bahan bakar atau aditif yang meleleh saat mesin bekerja pada kecepatan tinggi.",
-            solusi: "Ganti busi. Deposit ini tidak bisa dibersihkan dan dapat menyebabkan misfire (brebet)."
-        }
+    // LIBRARY DATABASE WARNA & KERUSAKAN BUSI (12 KATEGORI EXPERT)
+    const LIBRARY = [
+        { name: "NORMAL (IDEAL)", rgb: [188, 158, 130], ind: "Warna coklat muda (Tan) atau abu-abu. Pembakaran sempurna.", pen: "Setelan AFR (Air Fuel Ratio) tepat dan pengapian sehat.", sol: "Bersihkan busi secara berkala, tidak perlu diganti." },
+        { name: "KERAK KARBON (CARBON FOULING)", rgb: [30, 30, 30], ind: "Hitam kering berjelaga pada insulator dan elektroda.", pen: "Campuran terlalu boros, filter udara kotor, atau mesin sering idle lama.", sol: "Ganti filter udara, servis karburator/injeksi, cek sistem choke." },
+        { name: "KERAK OLI (OIL FOULING)", rgb: [10, 10, 10], ind: "Hitam basah, berminyak, dan berkilat.", pen: "Kebocoran oli dari ring piston atau seal klep yang aus.", sol: "Perlu bongkar mesin untuk ganti ring piston/seal klep." },
+        { name: "OVERHEATING (KEPANASAN)", rgb: [245, 245, 245], ind: "Putih melepuh, elektroda terkikis drastis.", pen: "Angka oktan terlalu rendah atau pemilihan tipe busi terlalu panas.", sol: "Ganti ke busi tipe dingin (angka lebih tinggi) dan gunakan bensin oktan tinggi." },
+        { name: "DETONASI (EXPLOSION DAMAGE)", rgb: [200, 200, 200], ind: "Insulator retak atau pecah-pecah kecil.", pen: "Waktu pengapian terlalu maju (timing tidak tepat) atau bensin basi.", sol: "Setel ulang timing pengapian dan kuras tangki bensin." },
+        { name: "DEPOSIT ABU (ASH DEPOSITS)", rgb: [170, 170, 170], ind: "Tumpukan warna coklat muda/putih berpasir tebal.", pen: "Kualitas oli mesin buruk atau pemakaian oli samping berlebih.", sol: "Ganti merek oli mesin dan bersihkan ruang bakar." },
+        { name: "GLAZING (MENGKILAP)", rgb: [130, 100, 60], ind: "Coklat tua mengkilap seperti lapisan kaca.", pen: "Suhu ruang bakar naik mendadak saat kecepatan tinggi menyebabkan deposit mencair.", sol: "Busi tidak bisa dibersihkan, harus ganti baru." },
+        { name: "BUSI BARU", rgb: [220, 220, 220], ind: "Warna putih bersih tanpa deposit sama sekali.", pen: "Busi belum lama digunakan atau mesin belum mencapai suhu kerja.", sol: "Lanjutkan pemakaian untuk melihat pola pembakaran asli." },
+        { name: "SPLASHED DEPOSITS", rgb: [150, 130, 110], ind: "Bintik-bintik gelap menempel tidak merata pada insulator.", pen: "Kerak di ruang bakar lepas dan menempel pada busi setelah servis/tune up.", sol: "Bersihkan busi, kondisi ini biasanya hilang setelah mesin dipakai jalan." },
+        { name: "MECHANICAL DAMAGE", rgb: [100, 100, 100], ind: "Elektroda bengkok atau insulator hancur karena hantaman.", pen: "Ada benda asing di ruang bakar atau panjang busi tidak sesuai (mentok piston).", sol: "Ganti busi sesuai kode standar motor dan cek kondisi dalam silinder." },
+        { name: "LEAN MISFIRE", rgb: [255, 250, 240], ind: "Warna sangat pucat ke arah kuning.", pen: "Injektor tersumbat atau tekanan pompa bensin lemah.", sol: "Kuras tangki dan bersihkan sistem injeksi (infus injektor)." },
+        { name: "SULFUR CORROSION", rgb: [190, 160, 140], ind: "Elektroda berkarat atau berubah warna kehijauan.", pen: "Kualitas bahan bakar rendah dengan kandungan sulfur tinggi.", sol: "Ganti bensin di SPBU yang terpercaya." }
     ];
 
-    const camInput = document.getElementById('camera');
-    const preview = document.getElementById('preview');
-    const canvas = document.getElementById('scanCanvas');
-    const ctx = canvas.getContext('2d', { willReadFrequently: true });
+    const video = document.getElementById('video');
+    const photo = document.getElementById('photo-preview');
+    const canvas = document.getElementById('canvas');
+    const snapBtn = document.getElementById('snap');
+    const resetBtn = document.getElementById('reset');
 
-    camInput.onchange = (e) => {
-        const file = e.target.files[0];
-        if(!file) return;
+    // Aktifkan Kamera Langsung
+    async function initCamera() {
+        try {
+            const stream = await navigator.mediaDevices.getUserMedia({ 
+                video: { facingMode: "environment", focusMode: "continuous" } 
+            });
+            video.srcObject = stream;
+        } catch (err) {
+            alert("Gagal akses kamera. Pastikan izin diberikan.");
+        }
+    }
 
-        const reader = new FileReader();
-        reader.onload = (f) => {
-            preview.src = f.target.result;
-            preview.style.display = 'block';
-            document.getElementById('guideline').style.display = 'none';
-            
-            preview.onload = () => {
-                // Gambar ke canvas untuk analisis
-                canvas.width = preview.naturalWidth;
-                canvas.height = preview.naturalHeight;
-                ctx.drawImage(preview, 0, 0);
-                
-                // Ambil rata-rata warna di area target (Tengah)
-                const size = 50; // Luas area sampel
-                const x = (canvas.width / 2) - (size / 2);
-                const y = (canvas.height / 2) - (size / 2);
-                const imgData = ctx.getImageData(x, y, size, size).data;
-                
-                let r=0, g=0, b=0;
-                for(let i=0; i<imgData.length; i+=4) {
-                    r += imgData[i]; g += imgData[i+1]; b += imgData[i+2];
-                }
-                const count = imgData.length / 4;
-                const avgR = Math.round(r/count);
-                const avgG = Math.round(g/count);
-                const avgB = Math.round(b/count);
-                
-                processDiagnosis(avgR, avgG, avgB);
-            };
-        };
-        reader.readAsDataURL(file);
+    // Trigger Fokus (Hanya untuk browser yang mendukung)
+    function requestAutoFocus() {
+        const track = video.srcObject.getVideoTracks()[0];
+        const capabilities = track.getCapabilities();
+        if (capabilities.focusMode && capabilities.focusMode.includes('continuous')) {
+            track.applyConstraints({ advanced: [{ focusMode: 'continuous' }] });
+        }
+    }
+
+    snapBtn.onclick = () => {
+        const ctx = canvas.getContext('2d', { willReadFrequently: true });
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+        ctx.drawImage(video, 0, 0);
+
+        // Preview foto
+        photo.src = canvas.toDataURL('image/jpeg');
+        photo.style.display = 'block';
+        snapBtn.style.display = 'none';
+        resetBtn.style.display = 'block';
+
+        // Analisis warna di area tengah
+        const size = 60;
+        const x = (canvas.width / 2) - (size / 2);
+        const y = (canvas.height / 2) - (size / 2);
+        const data = ctx.getImageData(x, y, size, size).data;
+
+        let r=0, g=0, b=0;
+        for(let i=0; i<data.length; i+=4) {
+            r += data[i]; g += data[i+1]; b += data[i+2];
+        }
+        const count = data.length / 4;
+        diagnosa(Math.round(r/count), Math.round(g/count), Math.round(b/count));
     };
 
-    function processDiagnosis(r, g, b) {
-        let match = BUSI_DB[0];
+    resetBtn.onclick = () => {
+        photo.style.display = 'none';
+        snapBtn.style.display = 'block';
+        resetBtn.style.display = 'none';
+        document.getElementById('res').style.display = 'none';
+    };
+
+    function diagnosa(r, g, b) {
+        let match = LIBRARY[0];
         let minDiff = Infinity;
 
-        BUSI_DB.forEach(item => {
-            // Algoritma Delta-E sederhana (Euclidean distance)
-            const diff = Math.sqrt(
-                Math.pow(r - item.rgb[0], 2) +
-                Math.pow(g - item.rgb[1], 2) +
-                Math.pow(b - item.rgb[2], 2)
-            );
-            if(diff < minDiff) {
-                minDiff = diff;
-                match = item;
-            }
+        LIBRARY.forEach(item => {
+            const d = Math.sqrt(Math.pow(r-item.rgb[0],2) + Math.pow(g-item.rgb[1],2) + Math.pow(b-item.rgb[2],2));
+            if(d < minDiff) { minDiff = d; match = item; }
         });
 
         const hex = "#" + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1).toUpperCase();
-        
-        // Tampilkan Hasil
         document.getElementById('res').style.display = 'block';
-        document.getElementById('colBox').style.backgroundColor = hex;
-        document.getElementById('colHex').innerText = `HEX: ${hex} | RGB: ${r},${g},${b}`;
-        document.getElementById('colName').innerText = match.name;
-        document.getElementById('txtIndikasi').innerText = match.indikasi;
-        document.getElementById('txtPenyebab').innerText = match.penyebab;
-        document.getElementById('txtSolusi').innerText = match.solusi;
-
+        document.getElementById('resCol').style.backgroundColor = hex;
+        document.getElementById('resHex').innerText = `HEX: ${hex} | RGB: ${r},${g},${b}`;
+        document.getElementById('resName').innerText = match.name;
+        document.getElementById('resInd').innerText = match.ind;
+        document.getElementById('resPen').innerText = match.pen;
+        document.getElementById('resSol').innerText = match.sol;
+        
         window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
     }
+
+    window.onload = initCamera;
 </script>
 </body>
 </html>
