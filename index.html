@@ -3,183 +3,221 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Scanner Busi Digital - SMKN 1 Sumarorong</title>
+    <title>Expert Spark Plug Scanner - SMKN 1 Sumarorong</title>
     <style>
-        :root { --primary: #0f172a; --gold: #fbbf24; --accent: #2563eb; }
-        body { font-family: sans-serif; background: var(--primary); color: white; text-align: center; padding: 20px; margin: 0; }
-        .card { max-width: 450px; margin: auto; background: #1e293b; padding: 20px; border-radius: 25px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); border: 1px solid #334155; }
-        h2 { color: var(--gold); margin: 0; letter-spacing: 1px; }
-        #box { width: 100%; height: 280px; background: #000; border-radius: 20px; margin: 20px 0; display: flex; align-items: center; justify-content: center; border: 2px dashed #475569; position: relative; overflow: hidden; }
-        img { max-width: 100%; max-height: 100%; display: none; object-fit: contain; }
-        .btn { background: var(--gold); color: black; padding: 16px; border: none; border-radius: 14px; font-weight: 900; width: 100%; cursor: pointer; margin-bottom: 10px; font-size: 1rem; transition: 0.3s; }
-        .btn:active { transform: scale(0.98); }
-        #res { background: #0f172a; padding: 20px; border-radius: 15px; text-align: left; display: none; margin-top: 20px; border-top: 4px solid var(--gold); }
-        .color-preview { width: 50px; height: 50px; border-radius: 10px; border: 2px solid white; display: inline-block; vertical-align: middle; margin-right: 15px; }
-        .meta-text { font-size: 0.85rem; color: #94a3b8; margin-top: 5px; }
-        .result-title { color: var(--gold); font-weight: bold; font-size: 1.1rem; display: block; margin-bottom: 10px; }
-        .info-tag { display: inline-block; background: #334155; padding: 4px 10px; border-radius: 6px; font-size: 0.7rem; margin-right: 5px; }
+        :root { --bg: #0f172a; --card: #1e293b; --gold: #fbbf24; --blue: #3b82f6; --text: #f8fafc; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 15px; display: flex; justify-content: center; }
+        .card { width: 100%; max-width: 480px; background: var(--card); padding: 25px; border-radius: 30px; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5); border: 1px solid #334155; }
+        
+        .header h1 { font-size: 1.5rem; color: var(--gold); margin: 0; text-transform: uppercase; font-weight: 900; font-style: italic; }
+        .header p { font-size: 0.75rem; color: #94a3b8; margin: 5px 0 20px 0; letter-spacing: 2px; }
+
+        /* Camera Box & Focus Target */
+        #viewport { 
+            width: 100%; height: 320px; background: #000; border-radius: 20px; 
+            margin-bottom: 20px; position: relative; overflow: hidden; border: 2px solid #475569;
+        }
+        #preview { width: 100%; height: 100%; object-fit: contain; display: none; }
+        .target-overlay {
+            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            width: 80px; height: 80px; border: 2px dashed var(--gold); border-radius: 50%;
+            pointer-events: none; display: flex; align-items: center; justify-content: center;
+        }
+        .target-overlay::after { content: 'FOKUS INSULATOR'; font-size: 8px; color: var(--gold); margin-top: 100px; white-space: nowrap; font-weight: bold; }
+
+        .btn { 
+            background: var(--gold); color: #000; padding: 18px; border-radius: 15px; 
+            font-weight: 800; cursor: pointer; width: 100%; border: none; font-size: 1rem;
+            box-shadow: 0 4px 15px rgba(251, 191, 36, 0.3); transition: 0.2s;
+        }
+        .btn:active { transform: scale(0.96); }
+
+        /* Result Section */
+        #res { margin-top: 25px; padding: 20px; background: #0f172a; border-radius: 20px; display: none; border: 1px solid #334155; text-align: left; }
+        .color-circle { width: 45px; height: 45px; border-radius: 12px; border: 2px solid #fff; flex-shrink: 0; }
+        .diag-header { display: flex; align-items: center; gap: 15px; margin-bottom: 15px; }
+        
+        .box-info { background: #1e293b; padding: 12px; border-radius: 12px; margin-bottom: 10px; border-left: 4px solid var(--blue); }
+        .box-info label { display: block; font-size: 0.7rem; color: #94a3b8; font-weight: bold; text-transform: uppercase; margin-bottom: 4px; }
+        .box-info p { margin: 0; font-size: 0.9rem; line-height: 1.5; color: #e2e8f0; }
+        
+        .step-fix { border-left-color: var(--gold); background: rgba(251, 191, 36, 0.05); }
+        canvas { display: none; }
     </style>
 </head>
 <body>
 
 <div class="card">
-    <h2>BENYAMIN BATAU APP</h2>
-    <p class="meta-text">Digital Spark Plug Colorimetry Analysis</p>
-
-    <div id="box">
-        <span id="label">SIAPKAN FOTO BUSI</span>
-        <img id="preview">
-        <canvas id="canvas" style="display:none;"></canvas>
+    <div class="header">
+        <h1>BENYAMIN BATAU APP</h1>
+        <p>SMKN 1 SUMARORONG • TSM EXPERT SYSTEM</p>
     </div>
 
-    <input type="file" id="inp" accept="image/*" capture="camera" style="display:none">
-    <button class="btn" onclick="document.getElementById('inp').click()">AMBIL FOTO & ANALISIS</button>
+    <div id="viewport">
+        <div class="target-overlay" id="guideline"></div>
+        <img id="preview" alt="Busi">
+        <canvas id="scanCanvas"></canvas>
+    </div>
+
+    <input type="file" id="camera" accept="image/*" capture="camera" style="display:none">
+    <button class="btn" onclick="document.getElementById('camera').click()">AMBIL FOTO BUSI</button>
 
     <div id="res">
-        <div style="display:flex; align-items:center; margin-bottom:15px;">
-            <div id="detected-color" class="color-preview"></div>
+        <div class="diag-header">
+            <div id="colBox" class="color-circle"></div>
             <div>
-                <span id="color-name" class="result-title">Menganalisis...</span>
-                <div id="codes" class="meta-text"></div>
+                <div id="colName" style="font-weight:900; color:var(--gold); font-size: 1.1rem;">-</div>
+                <div id="colHex" style="font-size:0.7rem; color:#64748b; font-family:monospace;">HEX: #000000</div>
             </div>
         </div>
-        <div id="details">
-            <p id="indikasi" style="color:#f8fafc; font-size:0.95rem;"></p>
-            <p id="penyebab" style="color:#cbd5e1; font-size:0.85rem; background:#1e293b; padding:10px; border-radius:8px;"></p>
-            <p id="perbaikan" style="color:var(--gold); font-size:0.9rem; font-weight:bold;"></p>
+
+        <div class="box-info">
+            <label>Analisis Kondisi</label>
+            <p id="txtIndikasi">-</p>
+        </div>
+        <div class="box-info">
+            <label>Kemungkinan Penyebab</label>
+            <p id="txtPenyebab">-</p>
+        </div>
+        <div class="box-info step-fix">
+            <label>Rekomendasi Perbaikan</label>
+            <p id="txtSolusi" style="color:var(--gold); font-weight:bold;">-</p>
         </div>
     </div>
 </div>
 
 <script>
-    // LIBRARY DATABASE WARNA BUSI (Champion, Bosch, Denso & Pengalaman Lapangan)
-    const BUSI_LIBRARY = [
+    // LIBRARY DATABASE WARNA BUSI (STANDARD NGK, DENSO, CHAMPION)
+    const BUSI_DB = [
         {
-            name: "Normal (Pembakaran Sempurna)",
-            hex: "#D2B48C", rgb: [210, 180, 140],
-            indikasi: "Kondisi mesin sangat baik. Pembakaran efisien.",
-            penyebab: "Campuran udara-bahan bakar tepat dan sistem pengapian bekerja optimal.",
-            perbaikan: "Lanjutkan perawatan rutin. Busi tidak perlu diganti."
+            name: "NORMAL (OPTIMAL)",
+            rgb: [210, 180, 140], hex: "#D2B48C",
+            indikasi: "Warna coklat muda / abu-abu (Tan Color). Pembakaran mesin sangat efisien.",
+            penyebab: "Campuran udara & bensin pas, waktu pengapian tepat, tingkat panas busi sesuai.",
+            solusi: "Kondisi sangat baik. Pertahankan perawatan rutin dan gunakan bensin kualitas stabil."
         },
         {
-            name: "Normal (Busi Baru)",
-            hex: "#F5F5F5", rgb: [245, 245, 245],
-            indikasi: "Busi baru atau mesin baru dijalankan sebentar.",
-            penyebab: "Belum ada deposit karbon yang menempel pada insulator.",
-            perbaikan: "Kondisi normal untuk komponen baru."
+            name: "BUSI BARU / MESIN DINGIN",
+            rgb: [240, 240, 240], hex: "#F0F0F0",
+            indikasi: "Insulator masih putih bersih. Belum ada deposit.",
+            penyebab: "Busi baru dipasang atau mesin hanya dihidupkan sebentar (belum mencapai suhu kerja).",
+            solusi: "Normal untuk komponen baru. Jalankan motor sekitar 15 menit untuk melihat pola pembakaran asli."
         },
         {
-            name: "Kering / Irit (Lean)",
-            hex: "#FFFFFF", rgb: [255, 255, 255],
-            indikasi: "Campuran bahan bakar terlalu miskin (terlalu banyak udara).",
-            penyebab: "Jet karburator mampet, tekanan pompa bensin rendah, atau kebocoran vakum.",
-            perbaikan: "Setel ulang karburator/ECU, cek filter bensin."
+            name: "TERLALU IRIT (LEAN)",
+            rgb: [255, 255, 255], hex: "#FFFFFF",
+            indikasi: "Putih bersih membara. Mesin cenderung cepat panas (Overheating).",
+            penyebab: "Campuran bensin terlalu sedikit, ada kebocoran udara di intake, atau spuyer mampet.",
+            solusi: "Bersihkan karburator/injektor, cek filter bensin, dan pastikan tidak ada kebocoran pada manifol."
         },
         {
-            name: "Overheating (Keputihan/Meleleh)",
-            hex: "#E0E0E0", rgb: [224, 224, 224],
-            indikasi: "Busi terlalu panas (Overheat). Insulator terlihat melepuh.",
-            penyebab: "Angka oktan bensin rendah, waktu pengapian terlalu maju, atau pendinginan mesin buruk.",
-            perbaikan: "Gunakan bensin oktan lebih tinggi, cek sistem pendingin (radiator/kipas)."
+            name: "KERAK KARBON (DRY FOULING)",
+            rgb: [40, 40, 40], hex: "#282828",
+            indikasi: "Hitam kering berjelaga. Motor susah hidup di pagi hari.",
+            penyebab: "Campuran terlalu boros, filter udara sangat kotor, atau motor sering digunakan jarak pendek.",
+            solusi: "Bersihkan/ganti filter udara, servis karburator/injeksi. Gunakan busi dengan tingkat panas lebih tinggi."
         },
         {
-            name: "Carbon Fouling (Hitam Kering)",
-            hex: "#333333", rgb: [51, 51, 51],
-            indikasi: "Campuran terlalu kaya atau pengapian lemah.",
-            penyebab: "Filter udara kotor, choke terjepit, atau sering jalan jarak pendek (mesin belum panas).",
-            perbaikan: "Bersihkan filter udara, cek busi (ganti jika perlu), servis sistem bahan bakar."
+            name: "KERAK OLI (WET FOULING)",
+            rgb: [15, 15, 15], hex: "#0F0F0F",
+            indikasi: "Hitam basah dan berminyak. Keluar asap putih dari knalpot.",
+            penyebab: "Oli mesin masuk ke ruang bakar karena ring piston aus atau seal klep bocor.",
+            solusi: "Perlu bongkar mesin (Overhaul). Segera ganti ring piston dan seal klep untuk mencegah kerusakan silinder."
         },
         {
-            name: "Oil Fouling (Hitam Basah)",
-            hex: "#1A1A1A", rgb: [26, 26, 26],
-            indikasi: "Oli masuk ke ruang bakar.",
-            penyebab: "Ring piston aus, seal klep bocor, atau dinding silinder cacat.",
-            perbaikan: "Turun mesin (Top/Full Overhaul), ganti ring piston dan seal klep."
+            name: "OVERHEATING / PRE-IGNITION",
+            rgb: [220, 220, 220], hex: "#DCDCDC",
+            indikasi: "Insulator putih melepuh, elektroda tampak terkikis/meleleh.",
+            penyebab: "Oktan bensin terlalu rendah, pengapian terlalu maju, atau pendinginan mesin gagal.",
+            solusi: "Gunakan bensin oktan lebih tinggi (Pertamax/Turbo), cek radiator/kipas, dan gunakan busi 'Cold Type'."
         },
         {
-            name: "Lead Fouling (Kekuningan/Coklat Tua)",
-            hex: "#8B4513", rgb: [139, 69, 19],
-            indikasi: "Deposit bahan bakar mengandung timbal atau aditif.",
-            penyebab: "Penggunaan bahan bakar kualitas rendah atau aditif yang tidak cocok.",
-            perbaikan: "Ganti bahan bakar dan bersihkan ruang bakar."
+            name: "DEPOSIT ABU (ASH DEPOSIT)",
+            rgb: [180, 180, 180], hex: "#B4B4B4",
+            indikasi: "Tumpukan kerak berwarna kelabu/putih berpasir di ujung busi.",
+            penyebab: "Penggunaan oli samping berkualitas rendah (2-tak) atau aditif bensin yang tidak terbakar habis.",
+            solusi: "Ganti merek oli mesin/oli samping yang lebih berkualitas dan bersihkan kepala silinder."
         },
         {
-            name: "Deposit Abu (Ash Deposit)",
-            hex: "#BDBDBD", rgb: [189, 189, 189],
-            indikasi: "Penumpukan kerak sisa pembakaran aditif oli/bensin.",
-            penyebab: "Kualitas oli mesin kurang baik atau pemakaian oli berlebih.",
-            perbaikan: "Ganti merek oli, bersihkan kerak pada kepala silinder."
+            name: "LEAD FOULING",
+            rgb: [100, 70, 40], hex: "#644628",
+            indikasi: "Warna coklat tua kekuningan/mengkilap seperti kaca (Glazing).",
+            penyebab: "Sisa timbal dari bahan bakar atau aditif yang meleleh saat mesin bekerja pada kecepatan tinggi.",
+            solusi: "Ganti busi. Deposit ini tidak bisa dibersihkan dan dapat menyebabkan misfire (brebet)."
         }
     ];
 
-    const inp = document.getElementById('inp');
-    const pre = document.getElementById('preview');
-    const canvas = document.getElementById('canvas');
-    const ctx = canvas.getContext('2d');
+    const camInput = document.getElementById('camera');
+    const preview = document.getElementById('preview');
+    const canvas = document.getElementById('scanCanvas');
+    const ctx = canvas.getContext('2d', { willReadFrequently: true });
 
-    inp.onchange = (e) => {
+    camInput.onchange = (e) => {
         const file = e.target.files[0];
         if(!file) return;
 
         const reader = new FileReader();
-        reader.onload = (ev) => {
-            pre.src = ev.target.result;
-            pre.style.display = 'block';
-            document.getElementById('label').style.display = 'none';
+        reader.onload = (f) => {
+            preview.src = f.target.result;
+            preview.style.display = 'block';
+            document.getElementById('guideline').style.display = 'none';
             
-            pre.onload = () => {
-                analyzeColor();
+            preview.onload = () => {
+                // Gambar ke canvas untuk analisis
+                canvas.width = preview.naturalWidth;
+                canvas.height = preview.naturalHeight;
+                ctx.drawImage(preview, 0, 0);
+                
+                // Ambil rata-rata warna di area target (Tengah)
+                const size = 50; // Luas area sampel
+                const x = (canvas.width / 2) - (size / 2);
+                const y = (canvas.height / 2) - (size / 2);
+                const imgData = ctx.getImageData(x, y, size, size).data;
+                
+                let r=0, g=0, b=0;
+                for(let i=0; i<imgData.length; i+=4) {
+                    r += imgData[i]; g += imgData[i+1]; b += imgData[i+2];
+                }
+                const count = imgData.length / 4;
+                const avgR = Math.round(r/count);
+                const avgG = Math.round(g/count);
+                const avgB = Math.round(b/count);
+                
+                processDiagnosis(avgR, avgG, avgB);
             };
         };
         reader.readAsDataURL(file);
     };
 
-    function analyzeColor() {
-        // Gambar foto ke canvas untuk ambil pixel
-        canvas.width = pre.naturalWidth;
-        canvas.height = pre.naturalHeight;
-        ctx.drawImage(pre, 0, 0);
-
-        // Ambil warna di area tengah (insulator)
-        const centerX = canvas.width / 2;
-        const centerY = canvas.height / 2;
-        const pixelData = ctx.getImageData(centerX, centerY, 1, 1).data;
-        const rgb = [pixelData[0], pixelData[1], pixelData[2]];
-        const hex = rgbToHex(rgb[0], rgb[1], rgb[2]);
-
-        displayResult(rgb, hex);
-    }
-
-    function rgbToHex(r, g, b) {
-        return "#" + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1).toUpperCase();
-    }
-
-    function displayResult(detectedRgb, detectedHex) {
-        let closest = BUSI_LIBRARY[0];
+    function processDiagnosis(r, g, b) {
+        let match = BUSI_DB[0];
         let minDiff = Infinity;
 
-        // Algoritma Euclidean Distance untuk cari warna paling mirip di Library
-        BUSI_LIBRARY.forEach(item => {
+        BUSI_DB.forEach(item => {
+            // Algoritma Delta-E sederhana (Euclidean distance)
             const diff = Math.sqrt(
-                Math.pow(detectedRgb[0] - item.rgb[0], 2) +
-                Math.pow(detectedRgb[1] - item.rgb[1], 2) +
-                Math.pow(detectedRgb[2] - item.rgb[2], 2)
+                Math.pow(r - item.rgb[0], 2) +
+                Math.pow(g - item.rgb[1], 2) +
+                Math.pow(b - item.rgb[2], 2)
             );
             if(diff < minDiff) {
                 minDiff = diff;
-                closest = item;
+                match = item;
             }
         });
 
-        document.getElementById('res').style.display = 'block';
-        document.getElementById('detected-color').style.backgroundColor = detectedHex;
-        document.getElementById('color-name').innerText = closest.name;
-        document.getElementById('codes').innerHTML = `HEX: ${detectedHex} | RGB: ${detectedRgb.join(',')}`;
-        document.getElementById('indikasi').innerHTML = `<strong>Indikasi:</strong> ${closest.indikasi}`;
-        document.getElementById('penyebab').innerHTML = `<strong>Penyebab:</strong> ${closest.penyebab}`;
-        document.getElementById('perbaikan').innerHTML = `💡 Langkah: ${closest.perbaikan}`;
+        const hex = "#" + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1).toUpperCase();
         
-        window.scrollTo(0, document.body.scrollHeight);
+        // Tampilkan Hasil
+        document.getElementById('res').style.display = 'block';
+        document.getElementById('colBox').style.backgroundColor = hex;
+        document.getElementById('colHex').innerText = `HEX: ${hex} | RGB: ${r},${g},${b}`;
+        document.getElementById('colName').innerText = match.name;
+        document.getElementById('txtIndikasi').innerText = match.indikasi;
+        document.getElementById('txtPenyebab').innerText = match.penyebab;
+        document.getElementById('txtSolusi').innerText = match.solusi;
+
+        window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
     }
 </script>
 </body>
