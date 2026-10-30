@@ -2,765 +2,1698 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>BENYAMIN BATAU APP - Ultra Precision Scanner v2.0</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="color-scheme" content="dark">
+    <title>BENYAMIN BATAU APP — Pembaca Ujung Busi</title>
     <style>
-        :root { 
-            --bg: #020617; 
-            --gold: #fbbf24; 
-            --text: #f8fafc; 
-            --accent: #3b82f6; 
-            --success: #10b981;
-            --danger: #ef4444;
+        :root {
+            --bg: #071018;
+            --bg-2: #101a27;
+            --card: #132033;
+            --line: #2a3d55;
+            --gold: #f5c15d;
+            --gold-2: #c9892d;
+            --text: #eef3f8;
+            --muted: #b7c3d1;
+            --accent: #7db2ff;
+            --ok: #3dd68c;
+            --warn: #f5c15d;
+            --danger: #ff6b6b;
+            --shadow: 0 10px 30px rgba(0, 0, 0, .28);
         }
-        body { 
-            font-family: 'Segoe UI', Roboto, sans-serif; 
-            background: var(--bg); 
-            color: var(--text); 
-            margin: 0; 
-            overflow-x: hidden;
+        * { box-sizing: border-box; }
+        html { scroll-behavior: smooth; }
+        body {
+            margin: 0;
+            font-family: "Segoe UI", system-ui, sans-serif;
+            background:
+                radial-gradient(1200px 500px at 10% -10%, rgba(245, 193, 93, .08), transparent 50%),
+                var(--bg);
+            color: var(--text);
+            line-height: 1.55;
             -webkit-font-smoothing: antialiased;
         }
-        
-        .app-header {
-            background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
-            padding: 18px; 
-            text-align: center; 
+        button, input { font: inherit; }
+        button { -webkit-tap-highlight-color: transparent; }
+        :focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+        .wrap { width: min(920px, 100%); margin: 0 auto; }
+        header.top {
+            padding: 18px 16px 14px;
             border-bottom: 3px solid var(--gold);
-            box-shadow: 0 4px 20px rgba(251, 191, 36, 0.15);
+            background: linear-gradient(180deg, #18283c, #0d1724 80%);
         }
-        .app-header h1 { 
-            margin: 0; 
-            font-size: 1.3rem; 
-            letter-spacing: 3px; 
-            color: var(--gold); 
-            font-weight: 900;
-            text-shadow: 0 2px 10px rgba(251, 191, 36, 0.3);
+        header.top h1 {
+            margin: 0;
+            font-size: clamp(1.15rem, 2.6vw, 1.55rem);
+            letter-spacing: .12em;
+            color: var(--gold);
+            font-weight: 850;
         }
-        .app-header p { 
-            margin: 4px 0 0; 
-            font-size: 0.65rem; 
-            opacity: 0.8; 
-            letter-spacing: 1.5px;
-        }
-        .version { 
-            font-size: 0.55rem; 
-            color: var(--accent); 
-            margin-top: 2px;
-        }
-
-        #viewport { 
-            position: relative; 
-            width: 100vw; 
-            height: 55vh; 
-            background: #000; 
-            border-bottom: 2px solid #334155;
-            overflow: hidden;
-        }
-        #video { 
-            width: 100%; 
-            height: 100%; 
-            object-fit: cover;
-            filter: contrast(1.1) brightness(1.05);
-        }
-        
-        .overlay { 
-            position: absolute; 
-            inset: 0; 
-            pointer-events: none; 
-            display: flex; 
-            align-items: center; 
-            justify-content: center;
-        }
-        
-        .target-box { 
-            width: 90px; 
-            height: 90px; 
-            border: 3px solid var(--gold); 
-            background: rgba(251, 191, 36, 0.03);
+        header.top p { margin: 4px 0 0; color: var(--muted); font-size: .92rem; }
+        .version { color: var(--accent); font-size: .78rem; letter-spacing: .04em; }
+        .layout { padding: 14px 14px 48px; }
+        #viewport {
             position: relative;
-            box-shadow: 0 0 0 5000px rgba(0,0,0,0.65),
-                        0 0 30px rgba(251, 191, 36, 0.4) inset;
-            border-radius: 4px;
-            animation: pulse 2s ease-in-out infinite;
+            height: min(58vh, 520px);
+            min-height: 280px;
+            background: #000;
+            border-radius: 16px;
+            overflow: hidden;
+            border: 1px solid var(--line);
+            box-shadow: var(--shadow);
         }
-        
-        @keyframes pulse {
-            0%, 100% { transform: scale(1); opacity: 1; }
-            50% { transform: scale(1.02); opacity: 0.9; }
-        }
-        
-        .crosshair {
+        #video, #still {
             position: absolute;
+            inset: 0;
             width: 100%;
             height: 100%;
+            object-fit: cover;
+            background: #000;
         }
-        .crosshair::before,
-        .crosshair::after {
-            content: '';
+        #still { display: none; }
+        #still.show { display: block; }
+        #video.hide { display: none; }
+        .overlay {
+            position: absolute;
+            inset: 0;
+            pointer-events: none;
+            display: grid;
+            place-items: center;
+        }
+        .target-box {
+            width: min(46vw, 230px);
+            height: min(46vw, 230px);
+            max-width: 62%;
+            max-height: 70%;
+            border: 2px solid var(--gold);
+            border-radius: 8px;
+            box-shadow: 0 0 0 2000px rgba(0, 0, 0, .45), inset 0 0 0 1px rgba(245, 193, 93, .35);
+            position: relative;
+        }
+        .target-box::before, .target-box::after {
+            content: "";
             position: absolute;
             background: var(--gold);
         }
-        .crosshair::before {
+        .target-box::before { left: 50%; top: 12%; bottom: 12%; width: 1px; }
+        .target-box::after { top: 50%; left: 12%; right: 12%; height: 1px; }
+        .aim-label {
+            position: absolute;
             left: 50%;
-            top: 0;
-            bottom: 0;
-            width: 1px;
+            bottom: -28px;
             transform: translateX(-50%);
-        }
-        .crosshair::after {
-            top: 50%;
-            left: 0;
-            right: 0;
-            height: 1px;
-            transform: translateY(-50%);
-        }
-        
-        .target-box::after {
-            content: "BIDIK AREA INSULATOR";
-            position: absolute; 
-            bottom: -28px; 
-            left: 50%; 
-            transform: translateX(-50%);
-            font-size: 9px; 
-            color: var(--gold); 
-            font-weight: bold; 
             white-space: nowrap;
-            text-shadow: 0 2px 8px rgba(0,0,0,0.8);
+            color: var(--gold);
+            font-size: .72rem;
+            font-weight: 750;
+            letter-spacing: .04em;
+            text-shadow: 0 2px 8px #000;
         }
-        
-        .corner {
+        .hud {
             position: absolute;
-            width: 15px;
-            height: 15px;
-            border: 2px solid var(--gold);
-        }
-        .corner.tl { top: -2px; left: -2px; border-right: none; border-bottom: none; }
-        .corner.tr { top: -2px; right: -2px; border-left: none; border-bottom: none; }
-        .corner.bl { bottom: -2px; left: -2px; border-right: none; border-top: none; }
-        .corner.br { bottom: -2px; right: -2px; border-left: none; border-top: none; }
-
-        .scan-info {
-            position: absolute;
-            top: 15px;
-            left: 15px;
-            right: 15px;
-            background: rgba(15, 23, 42, 0.9);
-            padding: 10px;
-            border-radius: 8px;
-            border: 1px solid rgba(251, 191, 36, 0.3);
-            font-size: 0.7rem;
-            backdrop-filter: blur(10px);
-        }
-        .scan-info div {
-            display: flex;
-            justify-content: space-between;
-            margin: 3px 0;
-        }
-        .scan-info .label { color: var(--gold); font-weight: 600; }
-        .scan-info .value { color: #94a3b8; font-family: monospace; }
-
-        .ui-panel { padding: 15px; box-sizing: border-box; }
-        
-        .btn {
-            background: linear-gradient(135deg, var(--gold) 0%, #f59e0b 100%);
-            color: #000; 
-            border: none; 
-            padding: 18px;
-            width: 100%; 
-            border-radius: 14px; 
-            font-weight: 900; 
-            font-size: 1.05rem; 
-            cursor: pointer;
-            box-shadow: 0 6px 20px rgba(251, 191, 36, 0.3);
-            transition: all 0.3s ease;
-            position: relative;
-            overflow: hidden;
-        }
-        .btn:active {
-            transform: scale(0.98);
-            box-shadow: 0 3px 10px rgba(251, 191, 36, 0.4);
-        }
-        .btn::before {
-            content: '';
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            width: 0;
-            height: 0;
-            border-radius: 50%;
-            background: rgba(255,255,255,0.3);
-            transform: translate(-50%, -50%);
-            transition: width 0.6s, height 0.6s;
-        }
-        .btn:active::before {
-            width: 300px;
-            height: 300px;
-        }
-        
-        #result { 
-            display: none; 
-            margin-top: 8px; 
-            padding-bottom: 40px;
-            animation: slideUp 0.4s ease-out;
-        }
-        
-        @keyframes slideUp {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        
-        .res-header { 
-            display: flex; 
-            gap: 15px; 
-            margin-bottom: 15px; 
-            align-items: center; 
-            background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
-            padding: 18px; 
-            border-radius: 18px; 
-            border: 1px solid #334155;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
-        }
-        
-        .color-preview { 
-            width: 75px; 
-            height: 75px; 
-            border-radius: 16px; 
-            border: 3px solid #fff; 
-            flex-shrink: 0;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.4);
-            position: relative;
-        }
-        .color-preview::after {
-            content: '';
-            position: absolute;
-            inset: 0;
-            border-radius: 13px;
-            background: linear-gradient(135deg, transparent 0%, rgba(255,255,255,0.1) 100%);
-        }
-        
-        .confidence-bar {
-            margin-top: 8px;
-            height: 6px;
-            background: #1e293b;
-            border-radius: 3px;
-            overflow: hidden;
-        }
-        .confidence-fill {
-            height: 100%;
-            background: linear-gradient(90deg, var(--success), var(--accent));
-            border-radius: 3px;
-            transition: width 0.6s ease-out;
-        }
-        
-        .diag-card { 
-            background: linear-gradient(135deg, #0f172a 0%, #020617 100%);
-            padding: 16px; 
-            border-radius: 14px; 
-            margin-bottom: 12px; 
-            border-left: 4px solid var(--accent);
-            box-shadow: 0 2px 10px rgba(0,0,0,0.3);
-        }
-        .diag-card label { 
-            font-size: 0.72rem; 
-            color: var(--gold); 
-            font-weight: 800; 
-            display: block; 
-            margin-bottom: 8px; 
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-        .diag-card p { 
-            margin: 0; 
-            font-size: 0.88rem; 
-            line-height: 1.6; 
-            color: #f1f5f9;
-        }
-        
-        .severity-indicator {
-            display: inline-block;
-            padding: 4px 10px;
-            border-radius: 12px;
-            font-size: 0.65rem;
-            font-weight: 700;
-            margin-left: 8px;
-            text-transform: uppercase;
-        }
-        .severity-normal { background: rgba(16, 185, 129, 0.2); color: var(--success); }
-        .severity-warning { background: rgba(251, 191, 36, 0.2); color: var(--gold); }
-        .severity-danger { background: rgba(239, 68, 68, 0.2); color: var(--danger); }
-        
-        .fix-card { 
-            border-left-color: var(--success); 
-            background: linear-gradient(135deg, rgba(6, 78, 59, 0.15) 0%, rgba(6, 78, 59, 0.05) 100%);
-        }
-        
-        .stats-grid {
+            left: 10px;
+            right: 10px;
+            top: 10px;
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 10px;
-            margin-top: 10px;
+            gap: 6px;
         }
-        .stat-box {
-            background: #1e293b;
-            padding: 10px;
+        .hud span {
+            background: rgba(8, 14, 22, .78);
+            border: 1px solid rgba(245, 193, 93, .28);
+            border-radius: 8px;
+            padding: 6px 8px;
+            font-size: .75rem;
+            color: var(--muted);
+            backdrop-filter: blur(8px);
+        }
+        .hud b { color: var(--gold); font-weight: 700; display: block; font-size: .68rem; letter-spacing: .04em; }
+        .controls { display: grid; gap: 8px; margin-top: 12px; }
+        .row { display: flex; gap: 8px; flex-wrap: wrap; }
+        .btn {
+            appearance: none;
+            border: 0;
+            border-radius: 12px;
+            padding: 14px 16px;
+            min-height: 48px;
+            font-weight: 800;
+            cursor: pointer;
+            color: #1b1406;
+            background: linear-gradient(180deg, var(--gold), var(--gold-2));
+        }
+        .btn:disabled { opacity: .55; cursor: not-allowed; }
+        .btn.secondary {
+            color: var(--text);
+            background: #24364c;
+            border: 1px solid var(--line);
+            font-weight: 700;
+        }
+        .btn.grow { flex: 1 1 220px; }
+        .file-btn { position: relative; overflow: hidden; }
+        .file-btn input {
+            position: absolute;
+            inset: 0;
+            opacity: 0;
+            cursor: pointer;
+        }
+        .note, .card, .warn-box, .ok-box {
+            background: var(--card);
+            border: 1px solid var(--line);
+            border-radius: 14px;
+            padding: 14px;
+            margin-top: 12px;
+        }
+        .note { color: var(--muted); font-size: .92rem; }
+        h2 { font-size: 1.15rem; margin: 28px 0 8px; }
+        h3 { font-size: 1rem; margin: 0 0 8px; color: var(--gold); }
+        .card h3 { margin-bottom: 6px; }
+        .card p, .card li { color: var(--text); }
+        .card p:first-of-type { margin-top: 0; }
+        .muted { color: var(--muted); }
+        .small { font-size: .88rem; }
+        .warn-box { border-color: rgba(245, 193, 93, .55); background: #2a220f; }
+        .ok-box { border-color: rgba(61, 214, 140, .4); }
+        .sev {
+            display: inline-block;
+            border-radius: 999px;
+            padding: 2px 8px;
+            font-size: .72rem;
+            font-weight: 800;
+            letter-spacing: .04em;
+            vertical-align: middle;
+        }
+        .sev-normal { background: rgba(61, 214, 140, .18); color: var(--ok); }
+        .sev-warning { background: rgba(245, 193, 93, .18); color: var(--warn); }
+        .sev-danger { background: rgba(255, 107, 107, .18); color: var(--danger); }
+        .sev-invalid { background: #24364c; color: var(--accent); }
+        .result-head { display: flex; gap: 14px; align-items: center; }
+        .swatch {
+            width: 84px;
+            height: 84px;
+            border-radius: 16px;
+            border: 2px solid #fff;
+            flex: 0 0 auto;
+            box-shadow: var(--shadow);
+        }
+        .bar {
+            height: 8px;
+            background: #0c1520;
+            border-radius: 99px;
+            overflow: hidden;
+            margin-top: 8px;
+        }
+        .bar > div { height: 100%; width: 0; background: linear-gradient(90deg, var(--ok), var(--accent)); }
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 8px;
+            margin-top: 12px;
+        }
+        .stat {
+            background: #0e1a28;
             border-radius: 10px;
+            padding: 8px;
             text-align: center;
         }
-        .stat-box .stat-label {
-            font-size: 0.65rem;
-            color: #94a3b8;
-            margin-bottom: 4px;
+        .stat b { display: block; color: var(--gold); font-family: ui-monospace, Consolas, monospace; font-size: .95rem; }
+        .stat span { color: var(--muted); font-size: .72rem; }
+        .chips { display: flex; flex-wrap: wrap; gap: 6px; margin: 6px 0 12px; }
+        .chip {
+            border: 1px solid var(--line);
+            background: #0e1a28;
+            color: var(--text);
+            border-radius: 999px;
+            padding: 8px 12px;
+            min-height: 40px;
+            cursor: pointer;
         }
-        .stat-box .stat-value {
-            font-size: 0.95rem;
-            font-weight: 700;
+        .chip[aria-pressed="true"] {
+            background: #3d3116;
+            border-color: var(--gold);
             color: var(--gold);
-            font-family: monospace;
         }
-        
-        canvas { display: none; }
-        
-        .loading {
+        .legend { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 8px; }
+        .legend div {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            background: #0e1a28;
+            border-radius: 10px;
+            padding: 8px;
+            font-size: .85rem;
+        }
+        .dot { width: 28px; height: 28px; border-radius: 8px; border: 1px solid #fff3; flex: 0 0 auto; }
+        table { width: 100%; border-collapse: collapse; font-size: .9rem; }
+        th, td { border-bottom: 1px solid var(--line); text-align: left; padding: 8px 6px; vertical-align: top; }
+        th { color: var(--gold); font-size: .78rem; letter-spacing: .03em; }
+        #patch {
+            width: 88px;
+            height: 88px;
+            border-radius: 12px;
+            border: 1px solid var(--line);
+            background: #000;
+        }
+        .split { display: flex; gap: 12px; align-items: center; }
+        ol.tight li, ul.tight li { margin: 4px 0; }
+        #loading {
             display: none;
             position: fixed;
             inset: 0;
-            background: rgba(0,0,0,0.8);
-            z-index: 1000;
+            background: rgba(0, 0, 0, .72);
+            z-index: 20;
             align-items: center;
             justify-content: center;
             flex-direction: column;
-            backdrop-filter: blur(5px);
+            gap: 10px;
         }
-        .loading.active { display: flex; }
+        #loading.show { display: flex; }
         .spinner {
-            border: 4px solid #334155;
-            border-top: 4px solid var(--gold);
+            width: 42px;
+            height: 42px;
             border-radius: 50%;
-            width: 50px;
-            height: 50px;
+            border: 4px solid #334155;
+            border-top-color: var(--gold);
             animation: spin 1s linear infinite;
         }
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        @media (max-width: 720px) {
+            .stats { grid-template-columns: 1fr 1fr; }
+            .hud { grid-template-columns: 1fr 1fr; }
         }
-        .loading-text {
-            margin-top: 15px;
-            color: var(--gold);
-            font-weight: 600;
-            font-size: 0.9rem;
+        @media (prefers-reduced-motion: reduce) {
+            html { scroll-behavior: auto; }
+            .spinner { animation: none; border-top-color: var(--gold); }
+        }
+        @media print {
+            body { background: #fff; color: #111; }
+            header.top { background: #fff; color: #111; }
+            header.top h1, h3, .stat b, th { color: #111; }
+            .card, .note, .warn-box, .stat, .hud span { background: #fff; color: #111; }
+            #viewport, .controls, #loading { display: none !important; }
+            a { color: #111; }
         }
     </style>
 </head>
 <body>
-
-<div class="loading" id="loading">
-    <div class="spinner"></div>
-    <div class="loading-text">MENGANALISIS WARNA...</div>
+<div id="loading" role="status" aria-live="polite">
+    <div class="spinner" aria-hidden="true"></div>
+    <div id="loadingText">Menyiapkan kamera…</div>
 </div>
 
-<div class="app-header">
-    <h1>BENYAMIN BATAU APP</h1>
-    <p>PRECISION SPARK PLUG DIAGNOSTIC SENSOR</p>
-    <p class="version">v2.0 PRO • SMKN 1 SUMARORONG • ENHANCED ALGORITHM</p>
-</div>
-
-<div id="viewport">
-    <video id="video" autoplay playsinline></video>
-    <div class="scan-info" id="scanInfo">
-        <div><span class="label">STATUS:</span> <span class="value" id="status">READY</span></div>
-        <div><span class="label">LIGHTING:</span> <span class="value" id="lighting">---</span></div>
-        <div><span class="label">SAMPLES:</span> <span class="value" id="samples">0</span></div>
+<header class="top">
+    <div class="wrap">
+        <h1>BENYAMIN BATAU APP</h1>
+        <p>Pembaca ujung busi untuk belajar. Warna foto adalah petunjuk, bukan alat ukur tersertifikasi.</p>
+        <p class="version">v3.0 · SMKN 1 SUMARORONG · CIELAB ΔE00 · sampel median · penolakan gelap/silau</p>
     </div>
-    <div class="overlay">
-        <div class="target-box">
-            <div class="crosshair"></div>
-            <div class="corner tl"></div>
-            <div class="corner tr"></div>
-            <div class="corner bl"></div>
-            <div class="corner br"></div>
+</header>
+
+<main class="layout wrap">
+    <section id="viewport" aria-label="Bidik kamera">
+        <video id="video" autoplay playsinline muted></video>
+        <img id="still" alt="Foto busi yang dipilih dari galeri">
+        <div class="hud">
+            <span><b>KAMERA</b><span id="camState">menyala…</span></span>
+            <span><b>CAHAYA</b><span id="lightState">—</span></span>
+            <span><b>BIDIKAN</b><span id="aimState">ujung insulator</span></span>
+            <span><b>SUMBER</b><span id="sourceState">kamera belakang</span></span>
+        </div>
+        <div class="overlay">
+            <div class="target-box" id="reticle">
+                <div class="aim-label">BIDIK HIDUNG INSULATOR</div>
+            </div>
+        </div>
+    </section>
+
+    <div class="controls">
+        <button id="snap" class="btn" type="button" disabled>Ambil warna di dalam bingkai</button>
+        <div class="row">
+            <button id="torch" class="btn secondary grow" type="button" hidden>Senter</button>
+            <button id="flip" class="btn secondary grow" type="button">Ganti kamera</button>
+            <label class="btn secondary grow file-btn">Foto galeri
+                <input id="file" type="file" accept="image/*">
+            </label>
         </div>
     </div>
-</div>
 
-<div class="ui-panel">
-    <button id="snap" class="btn">📸 AMBIL DATA & ANALISIS WARNA</button>
+    <p class="note">Isi bingkai dengan hidung insulator — keramik di ujung elektroda, di dalam rumah busi. Jangan membidik keramik luar, ulir, atau meja. Cahaya siang atau LED putih. Lampu kuning dan kilau langsung membuat warna bergeser. Senter boleh dipakai agar sampel tidak hitam palsu, tetapi keyakinan diturunkan karena cahaya senter tidak netral. Jika ponsel mencerahkan busi hitam sampai terlihat abu-abu, pegang tekstur kering atau basah sebagai bukti yang lebih kuat daripada angka L*.</p>
 
-    <div id="result">
-        <div class="res-header">
-            <div id="resCol" class="color-preview"></div>
-            <div style="flex: 1;">
-                <h3 id="resName" style="margin:0; color:var(--gold); font-size: 1.15rem; text-transform: uppercase;">-</h3>
-                <small id="resHex" style="opacity:0.7; font-family: monospace; font-size: 0.72rem; display: block; margin-top: 4px;"></small>
-                <div class="confidence-bar">
-                    <div class="confidence-fill" id="confidence"></div>
-                </div>
-                <small id="confText" style="font-size: 0.65rem; color: #94a3b8; margin-top: 4px; display: block;"></small>
-            </div>
-        </div>
+    <section id="result" hidden aria-live="polite"></section>
 
-        <div class="diag-card">
-            <label>📊 Diagnosa Kondisi <span class="severity-indicator" id="severity">---</span></label>
-            <p id="resInd">-</p>
-        </div>
-        
-        <div class="diag-card">
-            <label>🔍 Analisis Penyebab</label>
-            <p id="resPen">-</p>
-        </div>
-        
-        <div class="diag-card fix-card">
-            <label>🔧 Tindakan Perbaikan</label>
-            <p id="resSol">-</p>
-        </div>
-        
-        <div class="stats-grid">
-            <div class="stat-box">
-                <div class="stat-label">BRIGHTNESS</div>
-                <div class="stat-value" id="brightness">---</div>
-            </div>
-            <div class="stat-box">
-                <div class="stat-label">SATURATION</div>
-                <div class="stat-value" id="saturation">---</div>
-            </div>
-            <div class="stat-box">
-                <div class="stat-label">HUE ANGLE</div>
-                <div class="stat-value" id="hue">---</div>
-            </div>
-            <div class="stat-box">
-                <div class="stat-label">MATCH SCORE</div>
-                <div class="stat-value" id="matchScore">---</div>
-            </div>
-        </div>
-        
-        <button class="btn" style="background: linear-gradient(135deg, #334155 0%, #1e293b 100%); color:white; margin-top:15px;" onclick="resetScan()">🔄 SCAN ULANG</button>
-    </div>
-</div>
+    <h2>Cara membaca busi sebelum menekan tombol</h2>
+    <article class="card">
+        <h3>Yang boleh disimpulkan dari warna</h3>
+        <p>Yang dinilai hanya firing end: hidung insulator dan elektroda di ujung yang masuk ke ruang bakar. Warna itu terbentuk oleh suhu ujung busi dan sisa pembakaran pada periode mesin panas terakhir, terutama beberapa menit sebelum mesin dimatikan. Idle panjang di bengkel bisa menghitamkan busi yang sebelumnya normal.</p>
+        <p>NGK menempatkan suhu ujung yang baik kira-kira pada 500–800°C. Jelaga mulai terbakar saat ujung mencapai sekitar 450°C. Di atas kira-kira 800°C, risiko panas berlebih dan pre-ignition naik. Angka ini acuan pabrikan busi, bukan suhu yang diukur aplikasi ini.</p>
+        <p>Bensin pada lambda 1 bercampur udara kira-kira 14,7 berbanding 1 menurut massa. Motor injeksi sering mendekati angka itu saat cruise dan sedikit lebih kaya saat beban penuh. Motor karburator tidak punya satu angka campuran. Warna cokelat bukan bukti campuran tepat 14,7:1.</p>
+    </article>
 
-<canvas id="canvas"></canvas>
+    <article class="card">
+        <h3>Urutan yang dipakai siswa</h3>
+        <ol class="tight">
+            <li>Catat gejala, asap, dan kondisi jalan terakhir: idle, dalam kota, tanjakan, atau kecepatan.</li>
+            <li>Bersihkan kotoran di sekeliling busi sebelum dilepas agar tidak masuk silinder.</li>
+            <li>Lepas dengan kunci yang pas. Keramik yang retak karena kunci miring bukan kerusakan pembakaran.</li>
+            <li>Lihat dulu bentuk elektroda dan celah, baru warna. Celah mengikuti buku manual model. Akhiran NGK setelah tanda hubung adalah celah: -9 berarti 0,9 mm, -11 berarti 1,1 mm. Elektroda tengah iridium atau platinum tidak dikikir.</li>
+            <li>Bedakan kering doff, basah oli, basah bensin, dan mengilap seperti kaca. Kamera tidak bisa memegang busi.</li>
+            <li>Pada mesin lebih dari satu silinder, bandingkan semua busi. Satu busi hitam bukan bukti seluruh mesin kaya.</li>
+            <li>Pasang kembali mengikuti torsi buku manual. Busi kendor kurang melepas panas ke kepala silinder, jadi ujungnya bekerja lebih panas. Diameter ulir, panjang ulir, dan tipe dudukan harus sama dengan bawaan.</li>
+        </ol>
+    </article>
+
+    <article class="card">
+        <h3>Peta warna kasar</h3>
+        <p class="small muted">Kotak di bawah ilustrasi mengajar, bukan standar warna pabrik. Kerak asli tergantung lampu dan bahan bakar.</p>
+        <div class="legend">
+            <div><i class="dot" style="background:#a88462"></i><span>Cokelat muda atau abu-abu cokelat: daerah kerja yang wajar.</span></div>
+            <div><i class="dot" style="background:#3a3937"></i><span>Hitam kering doff: jelaga, campuran kaya, busi dingin, atau pengapian lemah.</span></div>
+            <div><i class="dot" style="background:linear-gradient(135deg,#1a1a1a,#4a4a4a)"></i><span>Hitam basah mengilap: oli. Kamera sering gagal melihat kilapnya.</span></div>
+            <div><i class="dot" style="background:#d9d7d1"></i><span>Pucat bersih: bisa kurus, bisa hanya sangat bersih. Cek elektroda.</span></div>
+            <div><i class="dot" style="background:#f3f3ee"></i><span>Putih kapur, elektroda terkikis: panas berlebih.</span></div>
+            <div><i class="dot" style="background:#cbb892"></i><span>Kerak krem kering: abu aditif oli atau bahan bakar.</span></div>
+            <div><i class="dot" style="background:#a24b32"></i><span>Merah bata atau oranye: curiga aditif ferosen atau MMT.</span></div>
+            <div><i class="dot" style="background:#c6a15a"></i><span>Kuning atau cokelat mengilap seperti kaca: glazur.</span></div>
+        </div>
+    </article>
+
+    <article class="card">
+        <h3>Arah angka heat range tidak sama</h3>
+        <p>Heat range adalah kemampuan busi membuang panas dari ujung ke kepala silinder. Busi panas menahan panas lebih lama. Busi dingin membuang panas lebih cepat. Heat range bukan ukuran kuatnya api.</p>
+        <table>
+            <thead>
+                <tr><th>Merek</th><th>Angka lebih besar</th><th>Contoh satu tingkat</th></tr>
+            </thead>
+            <tbody>
+                <tr><td>NGK standar</td><td>Lebih dingin</td><td>BKR6E-11 lebih panas daripada BKR7E-11. Akhiran -11 adalah celah 1,1 mm, bukan heat range.</td></tr>
+                <tr><td>NGK balap berawalan R</td><td>Lebih dingin, angka di belakang hubung</td><td>R5671A-10 lebih panas daripada R5671A-11.</td></tr>
+                <tr><td>Denso</td><td>Lebih dingin</td><td>IK20 lebih panas daripada IK22, dan lebih dingin daripada IK16.</td></tr>
+                <tr><td>Champion</td><td>Lebih panas</td><td>RCJ7Y lebih panas daripada RCJ6Y.</td></tr>
+                <tr><td>Bosch, sistem yang umum</td><td>Jangan ditebak</td><td>Arahnya sering berlawanan dengan NGK. Pakai katalog silang merek.</td></tr>
+            </tbody>
+        </table>
+        <p class="small">Ganti paling banyak satu tingkat dari kode bawaan, pada dimensi ulir yang sama, lalu baca ulang busi pada kondisi jalan yang sama. Busi resistor (huruf R pada kode NGK, misalnya BKR) jangan diganti busi tanpa resistor pada motor injeksi.</p>
+    </article>
+
+    <article class="card">
+        <h3>Batas alat ini</h3>
+        <ul class="tight">
+            <li>Ponsel mengubah warna lewat white balance, lampu, dan kompresi foto. ΔE00 di sini mengukur jarak ke warna acuan belajar, bukan sertifikat laboratorium.</li>
+            <li>Aplikasi tidak mengukur lambda, tekanan bahan bakar, kompresi, torsi busi, atau resistansi koil.</li>
+            <li>Hitam basah dan hitam kering bisa punya RGB yang sama. Kilap, bau, dan asap yang memisahkan oli, bensin, dan jelaga.</li>
+            <li>Tidak ada satu angka kompresi, celah, atau tekanan pompa untuk semua motor. Bandingkan dengan buku servis model itu.</li>
+            <li>Foto dinding putih bukan busi meleleh. Ruangan gelap bukan oli di ruang bakar. Keduanya ditolak.</li>
+        </ul>
+    </article>
+
+    <article class="card">
+        <h3>Bahan bakar dan oli yang relevan dengan kerak</h3>
+        <p>Pakai RON yang diminta buku manual atau tutup tangki. Yang umum beredar: Pertalite RON 90, Pertamax RON 92, Pertamax Green 95, Pertamax Turbo RON 98, BP 92, Revvo 92, dan Revvo 95. Produk lain mengikuti angka RON di dispenser. Premium RON 88 bukan bahan bakar resmi saat ini. Jika mesin minta minimum RON 92, RON 90 di bawah spek dan bisa memicu detonasi.</p>
+        <p>Pertamax Green 95 mengandung etanol. Pakai hanya jika motor memang sesuai. Pada sistem bahan bakar lama, etanol bisa merusak karet yang tidak tahan. Etanol bukan obat busi hitam.</p>
+        <p>Pengangkat oktan berferosen meninggalkan kerak besi berwarna merah bata. MMT meninggalkan endapan mangan kemerahan. Keduanya bisa membuat api bocor dan mengotori sensor oksigen. Bensin bertimbal sudah lama dihentikan, jadi kerak kuning timbal bukan temuan yang umum.</p>
+        <p>Mesin 4 langkah berkopling basah memakai oli JASO MA atau MA2. Oli mobil bertanda Energy Conserving bisa membuat kopling selip. Mutu API mobil bukan pengganti spesifikasi JASO. Mesin 2 langkah mengikuti pompa oli atau perbandingan campur di buku manual. Oli 2 langkah terlalu banyak mengotori busi. Oli terlalu sedikit bisa membuat piston macet.</p>
+    </article>
+
+    <article class="card">
+        <h3>Keselamatan</h3>
+        <p>Mesin panas membakar kulit. Jangan menyalakan mesin di ruang tertutup. Jauhkan api dari busi yang masih basah bensin. Jangan mengengkol terus jika insulator pecah atau elektroda hilang sebelum dipastikan tidak ada pecahan di silinder. Membongkar piston, ring, atau kepala silinder membutuhkan bukti lain selain foto.</p>
+    </article>
+</main>
+
+<canvas id="work" hidden></canvas>
+<canvas id="light" hidden></canvas>
 
 <script>
-    // ENHANCED COLOR LIBRARY - 120 KONDISI DENGAN METADATA
-    const LIBRARY = [
-        // NORMAL (Coklat/Tan) - 25 variasi
-        { name: "Normal Perfect", rgb: [180, 145, 115], severity: "normal", ind: "Coklat muda ideal. Pembakaran sempurna, efisiensi maksimal.", pen: "AFR optimal 14.7:1, suhu kerja 400-850°C, timing pengapian presisi.", sol: "Kondisi terbaik. Pertahankan perawatan rutin setiap 5.000 km." },
-        { name: "Normal Standard", rgb: [175, 140, 110], severity: "normal", ind: "Coklat standar sehat. Mesin bekerja dalam parameter ideal.", pen: "Sistem injeksi bahan bakar (FI) bekerja optimal, kompresi normal.", sol: "Lanjutkan penggunaan. Cek gap busi setiap 10.000 km (0.8-0.9mm)." },
-        { name: "Normal Warm", rgb: [170, 130, 100], severity: "normal", ind: "Coklat hangat. Temperatur operasional sempurna.", pen: "Heat range sesuai spesifikasi, sistem pendingin efektif.", sol: "Bersihkan drat busi dari kerak ringan setiap service." },
-        { name: "Normal Light Tan", rgb: [188, 150, 120], severity: "normal", ind: "Tan cerah. Pembakaran sangat bersih dan efisien.", pen: "Kualitas bensin premium baik, filter udara bersih.", sol: "Gunakan bensin RON 90+ sesuai rekomendasi pabrikan." },
-        { name: "Normal Grey Tan", rgb: [165, 145, 125], severity: "normal", ind: "Abu-coklat. Kondisi mesin stabil untuk pemakaian harian.", pen: "Beban mesin seimbang, tidak overload atau underload.", sol: "Perawatan berkala sudah tepat. Lanjutkan." },
-        { name: "Normal Deep Brown", rgb: [160, 125, 100], severity: "normal", ind: "Coklat tua masih aman. Sedikit deposit normal.", pen: "Penggunaan dalam kota dengan traffic padat.", sol: "Sesekali gas motor di putaran tinggi untuk burn-off deposit." },
-        { name: "Normal Sandy", rgb: [185, 155, 130], severity: "normal", ind: "Coklat pasir. Residu pembakaran minimal.", pen: "Oli mesin berkualitas baik, tidak ada kebocoran.", sol: "Ganti oli sesuai interval (2.000-3.000 km untuk matic)." },
-        { name: "Normal Earth", rgb: [155, 120, 95], severity: "normal", ind: "Coklat tanah. Warna khas motor berbahan bakar Premium.", pen: "Oktan bensin 88-90, tidak ada knocking.", sol: "Aman untuk perjalanan jauh." },
-        { name: "Normal Brick", rgb: [158, 123, 98], severity: "normal", ind: "Warna bata ringan. Kondisi kerja stabil.", pen: "PGM-FI atau karburator tersetting dengan baik.", sol: "Cek busi visual setiap 6 bulan." },
-        { name: "Normal Mocha", rgb: [150, 115, 90], severity: "normal", ind: "Coklat moka. Temperatur kerja rata di seluruh silinder.", pen: "Tidak ada misfiring, akselerasi responsif.", sol: "Gunakan busi sesuai kode panas pabrikan." },
-        { name: "Normal Dusty", rgb: [172, 138, 110], severity: "normal", ind: "Tan berdebu tipis. Pemakaian urban normal.", pen: "Stop-and-go traffic, tidak ada masalah.", sol: "Bersihkan air filter setiap 3.000 km." },
-        { name: "Normal Beige", rgb: [190, 165, 140], severity: "normal", ind: "Krem tan. Pembakaran sangat bersih.", pen: "Bensin berkualitas tinggi, sistem injeksi presisi.", sol: "Kondisi ideal. Pertahankan." },
-        { name: "Normal Light Grey", rgb: [162, 162, 158], severity: "normal", ind: "Abu muda sehat. Bahan bakar sangat bersih.", pen: "Minimal deposit karbon, efisiensi tinggi.", sol: "Sangat baik untuk long ride." },
-        { name: "Normal Oatmeal", rgb: [182, 158, 135], severity: "normal", ind: "Gandum cerah. Sensor O2 (lambda) bekerja optimal.", pen: "Closed-loop fuel system aktif dengan baik.", sol: "Check-up ECU setiap tahun." },
-        { name: "Normal Pale", rgb: [178, 148, 118], severity: "normal", ind: "Coklat pucat. Settingan AFR sedikit lean tapi aman.", pen: "Ekonomis BBM, tidak ada detonasi.", sol: "Monitor konsumsi bensin secara berkala." },
-        { name: "Normal Matte", rgb: [168, 135, 105], severity: "normal", ind: "Coklat doff. Residu pembakaran rendah.", pen: "Ruang bakar bersih, kompresi stabil.", sol: "Normal operation. Service sesuai manual book." },
-        { name: "Normal Copper", rgb: [174, 134, 98], severity: "normal", ind: "Tembaga-coklat. Suhu mesin konsisten.", pen: "Thermostat bekerja baik, coolant cukup.", sol: "Cek level air radiator rutin." },
-        { name: "Normal Khaki", rgb: [165, 135, 105], severity: "normal", ind: "Khaki brown. Aliran bensin lancar.", pen: "Fuel pump pressure normal 2.8-3.2 bar.", sol: "Bersihkan fuel strainer setiap 20.000 km." },
-        { name: "Normal Pebble", rgb: [160, 140, 120], severity: "normal", ind: "Warna kerikil. Self-cleaning busi aktif.", pen: "Suhu busi cukup untuk burn deposit.", sol: "Heat range sudah tepat." },
-        { name: "Normal Classic", rgb: [171, 139, 109], severity: "normal", ind: "Tan klasik Honda/Yamaha. Standar pabrik.", pen: "Settingan original tanpa modifikasi.", sol: "Maintain kondisi ini." },
-        { name: "Normal Soft Tan", rgb: [183, 148, 118], severity: "normal", ind: "Tan lembut. Motor injeksi modern.", pen: "ECU mapping optimal untuk efisiensi.", sol: "Gunakan fuel additive setiap 3 bulan (opsional)." },
-        { name: "Normal Warm Grey", rgb: [155, 155, 150], severity: "normal", ind: "Abu hangat. Pembakaran lean terkontrol.", pen: "Sedikit irit bensin, performa normal.", sol: "Kondisi baik untuk commuter." },
-        { name: "Normal Sienna", rgb: [157, 127, 97], severity: "normal", ind: "Sienna brown. Warna umum motor karbu.", pen: "Karburator jet needle posisi standard.", sol: "Cek float level karburator." },
-        { name: "Normal Caramel", rgb: [169, 141, 111], severity: "normal", ind: "Karamel. Slight carbon deposit normal.", pen: "Pemakaian dalam kota + luar kota seimbang.", sol: "Bersihkan throttle body setiap 15.000 km." },
-        { name: "Normal Adobe", rgb: [163, 133, 103], severity: "normal", ind: "Adobe brown. Kondisi sehat untuk motor tua (>5 tahun).", pen: "Wear normal sesuai usia motor.", sol: "Overhaul ringan jika sudah >40.000 km." },
+(function () {
+    "use strict";
 
-        // CARBON FOULING (Hitam Kering) - 20 variasi
-        { name: "Carbon Light", rgb: [70, 70, 70], severity: "warning", ind: "Hitam tipis. Awal fouling, campuran mulai rich.", pen: "AFR sekitar 13:1-13.5:1, sedikit boros bensin 5-10%.", sol: "Cek filter udara kotor. Ganti jika hitam/berminyak." },
-        { name: "Carbon Dry Soot", rgb: [55, 55, 55], severity: "warning", ind: "Jelaga kering menumpuk. Pembakaran tidak sempurna.", pen: "Ignition timing terlambat atau coil lemah.", sol: "Cek kondisi koil ignition, ganti jika resistansi >15kΩ." },
-        { name: "Carbon Standard", rgb: [48, 48, 48], severity: "warning", ind: "Carbon fouling sedang. Performa mesin turun.", pen: "Injector kotor/bocor, atau air filter tersumbat.", sol: "Ultrasonic cleaning injector + ganti air filter." },
-        { name: "Carbon Matte Black", rgb: [42, 42, 42], severity: "danger", ind: "Hitam doff tebal. Tarikan berat, konsumsi BBM naik 15-20%.", pen: "Mixture terlalu kaya, ECU mapping salah, atau sensor O2 rusak.", sol: "Scan ECU error code. Reset adaptif learning ECU." },
-        { name: "Carbon Charcoal", rgb: [38, 38, 38], severity: "danger", ind: "Seperti arang. Filter udara sangat kotor/basah oli.", pen: "Crankcase ventilation (breather) tersumbat.", sol: "Ganti air filter + bersihkan breather hose." },
-        { name: "Carbon Dark Ash", rgb: [60, 60, 60], severity: "warning", ind: "Abu gelap berkarbon. Sensor EOT/IAT rusak.", pen: "ECU mendapat data temperatur salah, over-fuel.", sol: "Scan sensor Engine Oil Temperature dan Intake Air Temp." },
-        { name: "Carbon Deep Soot", rgb: [32, 32, 32], severity: "danger", ind: "Jelaga sangat tebal. Idle kasar, sering mati.", pen: "Injektor bocor konstan atau pressure regulator gagal.", sol: "Ganti O-ring injector atau fuel pressure regulator." },
-        { name: "Carbon Velvet", rgb: [28, 28, 28], severity: "danger", ind: "Hitam beludru pekat. Bensin berlebih masuk silinder.", pen: "Float needle karbu macet atau FI pressure >3.5 bar.", sol: "Service karburator total atau cek fuel pump output." },
-        { name: "Carbon Graphite", rgb: [62, 62, 62], severity: "warning", ind: "Warna grafit. Motor sering jalan pelan/macet.", pen: "Low-speed usage, busi tidak mencapai self-clean temp.", sol: "Gas motor RPM tinggi (5000+) setiap 15 menit sekali." },
-        { name: "Carbon Grayish", rgb: [72, 72, 72], severity: "warning", ind: "Hitam keabu-abuan. Pengapian lemah, spark tidak kuat.", pen: "Kabel busi retak/bocor arus, atau CDI/ECU igniter lemah.", sol: "Ganti kabel busi jika resistansi >25kΩ/meter." },
-        { name: "Carbon Fouled Stage 1", rgb: [50, 50, 50], severity: "warning", ind: "Awal misfiring. Sesekali tersendat saat akselerasi.", pen: "Gap busi terlalu lebar (>1.1mm) atau electrode terkikis.", sol: "Set gap ke 0.8-0.9mm atau ganti busi baru." },
-        { name: "Carbon Fouled Stage 2", rgb: [45, 45, 45], severity: "danger", ind: "Fouling parah. Hambatan listrik tinggi, sulit start.", pen: "Kerak karbon menginsulasi elektroda.", sol: "Bersihkan dengan sikat kawat + contact cleaner." },
-        { name: "Carbon Rich Mixture", rgb: [40, 40, 40], severity: "danger", ind: "Over-rich. Asap hitam dari knalpot, bau bensin.", pen: "Main jet karbu terlalu besar atau TPS sensor error.", sol: "Turunkan ukuran main jet atau kalibrasi TPS." },
-        { name: "Carbon Smoky", rgb: [54, 54, 54], severity: "warning", ind: "Hitam asap tipis. Banyak sisa bahan bakar.", pen: "Kompresi rendah <8 bar, atau valve clearance tidak tepat.", sol: "Cek kompresi silinder + adjust valve clearance." },
-        { name: "Carbon Dead Spark", rgb: [35, 35, 35], severity: "danger", ind: "Busi mati total. Tidak ada percikan api.", pen: "Elektroda tertutup karbon penuh, atau gap short.", sol: "Ganti busi segera. Cek penyebab carbon buildup." },
-        { name: "Carbon Sludge Mix", rgb: [47, 47, 47], severity: "danger", ind: "Campuran karbon + residu. Piston ring bocor sedikit.", pen: "Oli terbakar sedikit + bensin over-rich.", sol: "Top overhaul: ganti ring piston + PnP head." },
-        { name: "Carbon Diesel-like", rgb: [37, 37, 37], severity: "danger", ind: "Hitam seperti diesel. Pembakaran sangat buruk.", pen: "Busi terlalu dingin untuk aplikasi, atau always low RPM.", sol: "Upgrade ke busi heat range lebih panas (misal UR4 ke UR5)." },
-        { name: "Carbon Powder", rgb: [65, 65, 65], severity: "warning", ind: "Seperti bubuk hitam. Mudah dibersihkan.", pen: "Short trip usage, mesin tidak mencapai operating temp.", sol: "Warming up 3-5 menit sebelum jalan." },
-        { name: "Carbon Crusty", rgb: [43, 43, 43], severity: "danger", ind: "Kerak karbon keras. Sulit dibersihkan.", pen: "Karbon terbakar ulang (re-carbonize), suhu tinggi lokal.", sol: "Rendam busi dalam carb cleaner 2 jam." },
-        { name: "Carbon Terminal", rgb: [30, 30, 30], severity: "danger", ind: "Stage terminal. Mesin hampir tidak bisa jalan.", pen: "Multi-fault: rich mixture + weak spark + low compression.", sol: "Diagnosis menyeluruh + major service diperlukan." },
+    if (!Math.hypot) {
+        Math.hypot = function (x, y) { return Math.sqrt(x * x + y * y); };
+    }
+    if (!Math.cbrt) {
+        Math.cbrt = function (x) {
+            const y = Math.pow(Math.abs(x), 1 / 3);
+            return x < 0 ? -y : y;
+        };
+    }
 
-        // OIL FOULING (Hitam Basah/Glossy) - 20 variasi
-        { name: "Oil Wet Light", rgb: [25, 25, 25], severity: "danger", ind: "Hitam basah ringan. Oli mulai masuk combustion chamber.", pen: "Seal katup (valve seal) mulai keras/retak.", sol: "Ganti valve seal sebelum makin parah." },
-        { name: "Oil Glossy", rgb: [15, 15, 15], severity: "danger", ind: "Hitam mengkilap. Ring piston aus atau stuck.", pen: "Piston ring clearance >0.5mm atau ring stuck di groove.", sol: "Turun mesin: ganti piston ring set + honing silinder." },
-        { name: "Oil Jet Black", rgb: [8, 8, 8], severity: "danger", ind: "Hitam pekat basah. Oli membanjiri silinder.", pen: "Ring piston patah, atau wall silinder oval/scratch.", sol: "Overhaul total: ganti piston set + boring silinder oversize." },
-        { name: "Oil Sludge", rgb: [18, 18, 18], severity: "danger", ind: "Lumpur oli tebal. Rembesan parah.", pen: "PCV (crankcase ventilation) valve macet tertutup.", sol: "Ganti PCV valve + bersihkan crankcase breather." },
-        { name: "Oil Greasy", rgb: [28, 28, 28], severity: "danger", ind: "Berminyak lengket. Kompresi bocor ke crankcase.", pen: "Blow-by gas berlebihan, tekanan crankcase tinggi.", sol: "Cek compression test. Jika <6 bar, overhaul needed." },
-        { name: "Oil Brim", rgb: [12, 12, 12], severity: "danger", ind: "Basah oli merata. Oli terbakar konstan.", pen: "Konsumsi oli >500ml per 1000km. Asap biru saat gas.", sol: "Wajib service besar: ganti ring, seal, boring jika perlu." },
-        { name: "Oil Deep Gloss", rgb: [10, 10, 10], severity: "danger", ind: "Sangat mengkilap seperti cat. Kebocoran serius.", pen: "Cylinder head gasket bocor oli ke combustion chamber.", sol: "Ganti head gasket + surface cylinder head (skimming)." },
-        { name: "Oil Heavy", rgb: [5, 5, 5], severity: "danger", ind: "Oli sangat tebal melapisi elektroda.", pen: "Kerusakan internal parah: piston, ring, cylinder worn.", sol: "Turun mesin total. Estimasi biaya 1.5-3 juta." },
-        { name: "Oil Dark Viscous", rgb: [22, 22, 22], severity: "danger", ind: "Cairan kental hitam. Penyekat oli rusak total.", pen: "Valve guide worn atau seal robek.", sol: "Machine shop: ganti valve guide + reaming + seal baru." },
-        { name: "Oil Tar", rgb: [6, 6, 6], severity: "danger", ind: "Hitam aspal lengket. Oli lama mengendap terbakar.", pen: "Oli tidak diganti >8000km, sludge terbentuk.", sol: "Engine flush + ganti oli synthetic + bersihkan piston crown." },
-        { name: "Oil Wet Soot", rgb: [20, 20, 20], severity: "danger", ind: "Campuran oli & karbon. Dual problem.", pen: "Rich mixture + oil consumption bersamaan.", sol: "Fix injector (rich) + fix ring piston (oil) secara bersamaan." },
-        { name: "Oil Slick", rgb: [14, 14, 14], severity: "danger", ind: "Lapisan licin oli. Seal klep intake bocor.", pen: "Oli terhisap dari intake saat vakum tinggi.", sol: "Ganti intake valve seal (biasanya lebih rusak dari exhaust)." },
-        { name: "Oil Lubricant Leak", rgb: [16, 16, 16], severity: "danger", ind: "Bocoran pelumas mekanis. Turbo seal rusak (jika ada).", pen: "Pada motor dengan turbo/supercharger.", sol: "Rebuild turbo atau ganti CHRA (center housing)." },
-        { name: "Oil Gooey", rgb: [19, 19, 19], severity: "danger", ind: "Lengket seperti lem. Residu oli sudah parah.", pen: "Oli bercampur carbon deposit lama.", sol: "Walnut blasting untuk bersihkan intake valve carbon." },
-        { name: "Oil Shimmer", rgb: [11, 11, 11], severity: "danger", ind: "Kilau basah. Motor mengeluarkan asap biru terus.", pen: "Blow-by berat, breather mengeluarkan asap oli.", sol: "Cek breather hose, pasang oil catch can (opsional)." },
-        { name: "Oil Soaked", rgb: [13, 13, 13], severity: "danger", ind: "Terrendam oli. Piston ring gap terlalu besar.", pen: "Ring end gap >1mm, oli lolos ke atas.", sol: "Ganti ring dengan part OEM, cek spesifikasi gap." },
-        { name: "Oil Dripping", rgb: [9, 9, 9], severity: "danger", ind: "Seperti menetes. Level oli berkurang cepat.", pen: "1 liter oli habis <2000km.", sol: "Major overhaul tidak bisa ditunda lagi." },
-        { name: "Oil Burned", rgb: [17, 17, 17], severity: "danger", ind: "Oli terbakar. Ruang bakar penuh residu.", pen: "Oli masuk + suhu tinggi = deposit keras.", sol: "Bersihkan piston crown dengan chemical decarbonizer." },
-        { name: "Oil Varnish", rgb: [21, 21, 21], severity: "danger", ind: "Lapisan vernis oli. Overheating + oil fouling.", pen: "Oli terbakar di suhu >180°C, membentuk lacquer.", sol: "Turun mesin + chemical cleaning + ganti oli high temp." },
-        { name: "Oil Terminal", rgb: [7, 7, 7], severity: "danger", ind: "Stadium akhir. Mesin hampir tidak bisa dipakai.", pen: "Multiple seal failure + ring failure + head gasket leak.", sol: "Konsultasi bengkel untuk estimasi total rebuild." },
+    const Xn = 0.95047, Yn = 1, Zn = 1.08883;
 
-        // LEAN & OVERHEAT (Putih/Cerah) - 25 variasi
-        { name: "Lean White", rgb: [225, 225, 225], severity: "warning", ind: "Putih bersih. Campuran terlalu irit/lean.", pen: "AFR >15.5:1, bensin kurang, udara berlebih.", sol: "Cek fuel pressure (harus 2.8-3.2 bar). Ganti fuel filter." },
-        { name: "Lean Dry White", rgb: [235, 235, 235], severity: "warning", ind: "Putih kering. Bensin tidak cukup mencapai busi.", pen: "Injektor tersumbat atau fuel pump output drop.", sol: "Ultrasonic clean injector. Test fuel pump output pressure." },
-        { name: "Lean Pale", rgb: [218, 218, 218], severity: "warning", ind: "Pucat keabuan. AFR di atas 15.5:1.", pen: "Sensor O2 membaca lean, ECU kurangi bensin berlebihan.", sol: "Scan O2 sensor voltage (harus 0.1-0.9V fluktuatif)." },
-        { name: "Lean Ivory", rgb: [228, 228, 220], severity: "warning", ind: "Warna gading. Settingan irit berlebihan.", pen: "Intake manifold bocor udara (vacuum leak).", sol: "Smoke test intake: spray carb cleaner, dengar perubahan RPM." },
-        { name: "Lean Silverish", rgb: [210, 210, 210], severity: "warning", ind: "Perak pucat. Suplai bensin tidak stabil.", pen: "Fuel strainer kotor atau tangki bensin kotor.", sol: "Bersihkan fuel strainer di fuel pump. Kuras tangki jika ada karat." },
-        { name: "Lean Vacuum", rgb: [222, 222, 222], severity: "warning", ind: "Kebocoran vakum intake. Udara masuk tidak terukur.", pen: "Gasket intake bocor atau throttle body seal rusak.", sol: "Ganti gasket intake manifold (biaya 50-150rb)." },
-        { name: "Lean Fuel Starve", rgb: [226, 226, 226], severity: "warning", ind: "Kelaparan bensin. Filter bensin mampet.", pen: "Fuel filter tidak diganti >20.000km.", sol: "Ganti fuel filter (inline atau di dalam fuel pump)." },
-        { name: "Lean Thin", rgb: [232, 232, 232], severity: "warning", ind: "Putih tipis. Bensin minimal tapi mesin jalan.", pen: "Pilot jet/idle jet terlalu kecil (motor karbu).", sol: "Naikan ukuran pilot jet 1 step (misal #38→#40)." },
-        { name: "Lean Clean Burn", rgb: [215, 215, 215], severity: "normal", ind: "Sangat bersih. Settingan irit untuk fuel economy.", pen: "Intentional lean tune untuk efisiensi BBM.", sol: "Normal jika untuk eco-riding. Monitor suhu mesin." },
-        
-        { name: "Overheat Blistered", rgb: [245, 245, 245], severity: "danger", ind: "Putih melepuh. Suhu sangat tinggi >950°C.", pen: "Busi heat range terlalu panas untuk penggunaan.", sol: "Ganti ke busi kode lebih dingin (misal NGK C7HSA→C6HSA)." },
-        { name: "Overheat Chalky", rgb: [248, 248, 248], severity: "danger", ind: "Putih kapur. Radiator bermasalah atau coolant habis.", pen: "Suhu mesin >105°C, coolant kurang/bocor.", sol: "Cek level coolant, pressure test radiator cap + hose." },
-        { name: "Overheat Eroded", rgb: [252, 252, 252], severity: "danger", ind: "Putih mengkilap. Elektroda terkikis/terbakar.", pen: "Ground electrode eroded >0.5mm, center melted.", sol: "Ganti busi baru SEGERA. Motor jangan dipaksa jalan." },
-        { name: "Overheat Snow", rgb: [255, 255, 255], severity: "danger", ind: "Sangat putih murni. Bahaya detonasi/knocking.", pen: "Pre-ignition terjadi, bensin oktan terlalu rendah.", sol: "Gunakan Pertamax (RON 92) atau Pertamax Turbo (RON 98)." },
-        { name: "Overheat Bone", rgb: [240, 240, 240], severity: "danger", ind: "Warna tulang. Mesin terlalu panas konstan.", pen: "Thermostat macet tertutup atau water pump rusak.", sol: "Ganti thermostat (opens 80-85°C) + cek water pump." },
-        { name: "Overheat Glazed", rgb: [246, 246, 238], severity: "danger", ind: "Putih kekuningan mengkilap. Temperatur ekstrim.", pen: "Ceramic glaze terbentuk di insulator (1000°C+).", sol: "Pakai busi kode 2 step lebih dingin + fix cooling system." },
-        { name: "Overheat Scorched", rgb: [242, 242, 242], severity: "danger", ind: "Hangus putih. Heat range salah pilih.", pen: "Busi untuk motor standar dipakai di motor modif.", sol: "Ganti busi sesuai power: >150HP pakai cold plug (C5/C6)." },
-        { name: "Overheat High Temp", rgb: [250, 250, 243], severity: "danger", ind: "Suhu kritis. Kipas radiator mati atau relay rusak.", pen: "Electric fan tidak nyala saat mesin panas.", sol: "Cek fan relay, fan motor, dan temperature switch sensor." },
-        { name: "Overheat Melt Warn", rgb: [254, 254, 254], severity: "danger", ind: "Hampir meleleh. Elektroda mulai deformasi.", pen: "Mesin dipaksa high RPM lama tanpa istirahat.", sol: "Istirahatkan mesin tiap 1 jam perjalanan. Cek oli." },
-        { name: "Overheat Pearly", rgb: [249, 249, 249], severity: "danger", ind: "Putih mutiara. Pemanasan berlebih.", pen: "Sirkulasi air radiator tersumbat scale/karat.", sol: "Radiator flush dengan chemical descaler + backflush." },
-        { name: "Overheat Glassy", rgb: [247, 247, 247], severity: "danger", ind: "Seperti kaca. Glaze insulator coating.", pen: "Busi mencapai >1100°C, insulasi bocor arus.", sol: "Ganti busi + check ignition timing (harus sesuai spek)." },
-        { name: "Overheat Ceramic", rgb: [251, 251, 251], severity: "danger", ind: "Keramik putih. Insulasi busi rusak permanen.", pen: "Thermal shock berulang (panas-dingin ekstrim).", sol: "Ganti busi + jangan siram mesin saat panas." },
-        { name: "Overheat Critical", rgb: [253, 253, 253], severity: "danger", ind: "Kritis. Metal electrode mulai mencair.", pen: "Detonasi parah, timing pengapian terlalu maju.", sol: "Retard timing 2-4°, gunakan bensin oktan lebih tinggi." },
-        { name: "Overheat Blinding", rgb: [255, 255, 252], severity: "danger", ind: "Putih menyilaukan. Bahaya kerusakan mesin.", pen: "Piston crown bisa meleleh, head gasket bisa terbakar.", sol: "STOP mesin SEGERA. Towing ke bengkel." },
-        { name: "Overheat Melted", rgb: [254, 254, 250], severity: "danger", ind: "Center electrode meleleh. Total failure.", pen: "Busi completely destroyed oleh panas ekstrim.", sol: "Ganti busi + full cooling system diagnosis + compression test." },
-        { name: "Overheat Albino", rgb: [255, 255, 255], severity: "danger", ind: "Stadium akhir overheat. Mesin dalam bahaya.", pen: "Cylinder head bisa warped, gasket blown.", sol: "Check cylinder head surface flatness + pressure test." },
-
-        // ASH & DEPOSITS (Abu/Krem) - 15 variasi
-        { name: "Ash Cream", rgb: [195, 185, 165], severity: "warning", ind: "Kerak krem. Aditif oli kualitas rendah terbakar.", pen: "ZDDP (zinc) dalam oli terbakar, deposit putih kekuningan.", sol: "Ganti ke oli fully synthetic dengan JASO MA/MA2 certified." },
-        { name: "Ash Grey", rgb: [165, 165, 165], severity: "warning", ind: "Abu-abu kapur. Bensin oktan rendah + sulfur tinggi.", pen: "Bensin non-premium dengan sulfur >500ppm.", sol: "Pindah ke Pertamax, sulfur lebih rendah (<50ppm)." },
-        { name: "Ash Sand", rgb: [205, 195, 175], severity: "warning", ind: "Kerak pasir kasar. Banyak residu mineral.", pen: "Bensin dari SPBU pinggir jalan, kontaminasi tanah/air.", sol: "Kuras tangki + gunakan SPBU brand (Pertamina/Shell)." },
-        { name: "Ash Lumpy", rgb: [185, 180, 170], severity: "warning", ind: "Gumpalan abu. Oli ikut terbakar sedikit.", pen: "Oil consumption normal <300ml/1000km tapi oli murah.", sol: "Upgrade oli ke tier lebih baik (SN→SN Plus/SP)." },
-        { name: "Ash White", rgb: [210, 210, 200], severity: "warning", ind: "Abu putih. Deposit calcium/magnesium dari aditif.", pen: "Detergent additives berlebihan dalam bensin/oli.", sol: "Ganti oli, kurangi penggunaan fuel additive berlebihan." },
-        { name: "Ash Dusty", rgb: [160, 160, 155], severity: "normal", ind: "Abu berdebu tipis. Residu aditif normal.", pen: "Oli berkualitas baik, ash content <1%.", sol: "Bersihkan busi setiap 10.000km dengan contact cleaner." },
-        { name: "Ash Cement", rgb: [150, 150, 145], severity: "warning", ind: "Abu semen keras. Pembakaran kotor lama.", pen: "Busi sudah >15.000km, deposit menumpuk.", sol: "Ganti busi baru (umur busi: iridium 30rb km, copper 10rb km)." },
-        { name: "Ash Cloudy", rgb: [178, 178, 173], severity: "normal", ind: "Abu awan. Sisa bensin dengan aditif detergent.", pen: "Shell V-Power/Pertamax Turbo dengan techron.", sol: "Normal untuk bensin premium. Cek busi setiap 6 bulan." },
-        { name: "Ash Tan", rgb: [190, 180, 160], severity: "normal", ind: "Abu tan. Aditif pembersih injector.", pen: "Efek samping fuel system cleaner/injector cleaner.", sol: "Normal jika habis pakai fuel treatment. Monitor 1 minggu." },
-        { name: "Ash Beige", rgb: [200, 190, 170], severity: "normal", ind: "Abu krem cerah. Deposit mineral rendah.", pen: "Air coolant mineral deposits minimal (pakai premixed).", sol: "Gunakan coolant premix, bukan air+concentrate." },
-        { name: "Ash Salt", rgb: [220, 215, 205], severity: "warning", ind: "Kerak garam. Bensin oplosan atau kontaminasi.", pen: "Bensin dicampur kerosene/minyak tanah.", sol: "Kuras tangki total + bersihkan fuel line + ganti filter." },
-        { name: "Ash Granular", rgb: [155, 155, 150], severity: "warning", ind: "Butiran abu kasar. Banyak kotoran terbakar.", pen: "Fuel filter sudah mampet, kotoran lolos ke injector.", sol: "Ganti fuel filter + flush fuel rail." },
-        { name: "Ash Muddy", rgb: [140, 140, 135], severity: "warning", ind: "Abu keruh. Oli & bensin sama-sama kotor.", pen: "Service diabaikan, oli + fuel filter tidak diganti.", sol: "Service berkala: ganti oli, filter udara, fuel filter." },
-        { name: "Ash Pale Grey", rgb: [192, 192, 186], severity: "normal", ind: "Abu pucat. Residu minimal, kondisi baik.", pen: "Motor terawat, oli dan bensin berkualitas.", sol: "Maintenance sudah optimal. Pertahankan." },
-        { name: "Ash Fossil", rgb: [172, 172, 166], severity: "warning", ind: "Abu tua mengeras. Kerak menahun.", pen: "Busi >20.000km, deposit sulit dibersihkan.", sol: "Wajib ganti busi. Cek gap sudah melebar >1.2mm." },
-
-        // LEAD & GLAZING (Kuning/Merah) - 15 variasi  
-        { name: "Lead Yellow", rgb: [145, 125, 65], severity: "warning", ind: "Kuning kusam. Bensin mengandung timbal (leaded).", pen: "Premium oplosan dengan bensin lama/ilegal.", sol: "STOP pakai bensin ini. Kuras tangki. Bahaya catalyst." },
-        { name: "Lead Reddish", rgb: [135, 85, 55], severity: "warning", ind: "Merah bata. Zat besi/mangan aditif berlebih.", pen: "Oktane booster berlebihan (MMT/ferrocene).", sol: "Hentikan aditif. Ganti SPBU. Bersihkan O2 sensor." },
-        { name: "Glazing Shiny", rgb: [155, 135, 75], severity: "warning", ind: "Mengkilap kuning. Suhu naik tiba-tiba, deposit meleleh.", pen: "Thermal shock, deposit membentuk glaze coating.", sol: "Ganti busi. Cek kenapa suhu spike (lean/timing/cooling)." },
-        { name: "Lead Gold", rgb: [160, 145, 85], severity: "warning", ind: "Kuning emas kusam. Sulfur tinggi di bensin.", pen: "Bensin non-subsidi kualitas rendah, S >500ppm.", sol: "Switch ke Pertamax/Shell. Sulfur <50ppm." },
-        { name: "Lead Mustard", rgb: [150, 140, 95], severity: "warning", ind: "Kuning mustard. Residu oktane booster kimia.", pen: "Penggunaan additive illegal (TEL/MTBE).", sol: "STOP additive. Risiko kerusakan catalytic converter." },
-        { name: "Lead Rusty", rgb: [125, 75, 45], severity: "warning", ind: "Berkarat merah-coklat. Air masuk ke bensin.", pen: "Tangki berkarat, air kondensasi tercampur bensin.", sol: "Kuras tangki + coating anti karat + ganti fuel pump." },
-        { name: "Glazing Amber", rgb: [140, 120, 70], severity: "warning", ind: "Warna amber. Deposit kaca dari silica/additive.", pen: "Glaze terbentuk di insulator, resistansi naik.", sol: "Ganti busi baru. Tidak bisa dibersihkan." },
-        { name: "Glazing Bronze", rgb: [130, 110, 60], severity: "warning", ind: "Warna perunggu. Overheat sesaat + deposit.", pen: "Engine knock, kemudian glaze terbentuk.", sol: "Ganti busi + retard timing + cek oktan bensin." },
-        { name: "Lead Brown Red", rgb: [115, 65, 50], severity: "warning", ind: "Merah kecoklatan. Kontaminasi zat besi.", pen: "Tangki besi berkarat, partikel besi terbakar.", sol: "Ganti tangki atau coating dengan POR-15." },
-        { name: "Lead Dull Gold", rgb: [152, 132, 82], severity: "warning", ind: "Emas kusam. Kontaminasi logam berat.", pen: "Bensin illegal dengan heavy metal additives.", sol: "Kuras sistem + service injector + ganti O2 sensor." },
-        { name: "Lead Copper", rgb: [156, 96, 66], severity: "warning", ind: "Warna tembaga. Zat kimia bensin abnormal.", pen: "Bensin oplosan dengan solvent/thinner.", sol: "Kuras bensin. Bersihkan fuel system. Ganti filter." },
-        { name: "Lead Ochre", rgb: [143, 123, 63], severity: "warning", ind: "Warna oker. Timbal tinggi (bensin era lama).", pen: "Bensin leaded (<2000) atau illegal fuel.", sol: "Jangan pakai. Merusak O2 sensor & catalytic converter." },
-        { name: "Glazing Transparent", rgb: [147, 127, 87], severity: "warning", ind: "Kuning bening. Kerak mencair lalu mengeras.", pen: "Thermal cycling, glaze coating terbentuk.", sol: "Ganti busi + investigasi penyebab overheat." },
-        { name: "Glazing Glassy", rgb: [163, 143, 103], severity: "warning", ind: "Seperti kaca licin. Suhu ekstrim berulang.", pen: "Racing usage atau modifikasi performance tinggi.", sol: "Pakai busi racing (iridium IX) heat range cold." },
-        { name: "Lead Dirty Yellow", rgb: [151, 141, 111], severity: "warning", ind: "Kuning kotor. Bensin oplosan kualitas buruk.", pen: "Mix premium + kerosene atau solar.", sol: "Kuras total. Risiko injector clogging & pump failure." }
-    ];
-
-    const video = document.getElementById('video');
-    const canvas = document.getElementById('canvas');
-    const snapBtn = document.getElementById('snap');
-    const resDiv = document.getElementById('result');
-    const loading = document.getElementById('loading');
-
-    let frameCount = 0;
-
-    async function startCamera() {
-        try {
-            const stream = await navigator.mediaDevices.getUserMedia({ 
-                video: { 
-                    facingMode: "environment", 
-                    width: { ideal: 1920 }, 
-                    height: { ideal: 1080 },
-                    frameRate: { ideal: 30 }
-                } 
-            });
-            video.srcObject = stream;
-            document.getElementById('status').innerText = 'ACTIVE';
-            monitorLighting();
-        } catch (e) { 
-            alert("Izin kamera diperlukan untuk menggunakan aplikasi ini!");
-            document.getElementById('status').innerText = 'ERROR';
+    const CONDITIONS = {
+        normal: {
+            severity: "normal",
+            title: "Ujung dalam daerah kerja",
+            summary: "Hidung insulator cokelat muda, tan, atau abu-abu kecokelatan. Ini daerah warna yang wajar menurut bagan NGK, selama elektroda tidak terkikis dan kerak tidak tebal.",
+            see: "Kering, warna merata, tepi elektroda masih ada. Sedikit cokelat kemerahan bisa muncul dari bahan bakar dan oli tertentu tanpa berarti kerusakan.",
+            meaning: "Pada kondisi jalan terakhir, ujung busi kemungkinan berada di jendela suhu yang bisa membersihkan jelaga ringan. Ini bukan bukti campuran tepat 14,7:1, bukan bukti kompresi, dan bukan alasan untuk mengubah heat range.",
+            causes: [
+                "Heat range bawaan sesuai pola pakai saat busi dibaca.",
+                "Campuran dan pengapian tidak meninggalkan jelaga tebal atau tanda panas berlebih.",
+                "Perjalanan cukup panjang agar ujung melewati kira-kira 450°C, sehingga jelaga ringan terbakar."
+            ],
+            checks: [
+                "Ukur celah dan bandingkan buku manual. Jangan memakai 0,8 mm untuk semua motor.",
+                "Pastikan yang dilihat hidung dalam, bukan bercak cokelat di keramik luar. Bercak luar dari lucutan korona dan uap oli biasanya normal.",
+                "Jika gejala tetap ada padahal warna baik, cari penyebab di luar warna: kopling selip, rem seret, ban kurang angin, atau sensor pada motor injeksi."
+            ],
+            actions: [
+                "Pertahankan kode busi bawaan, termasuk resistor dan panjang ulir.",
+                "Ganti bila celah sudah di luar spek atau elektroda membulat, walaupun warna masih cokelat.",
+                "Lanjutkan interval servis buku manual. Jangan mempersingkat interval hanya karena aplikasi ini."
+            ],
+            pitfalls: [
+                "Membaca busi setelah idle sepuluh menit menghapus jejak beban sebelumnya.",
+                "Menganggap semua cokelat tua sebagai karbon. Cokelat kering yang masih terbuka porinya biasanya masih normal."
+            ]
+        },
+        carbon: {
+            severity: "warning",
+            title: "Jelaga kering",
+            summary: "Hitam doff dan kering pada hidung insulator serta elektroda. Pembakaran meninggalkan karbon, atau ujung tidak cukup panas untuk membakar jelaga.",
+            see: "Tidak licin bila disentuh sarung. Tidak berbau bensin yang masih basah dan tidak berbau oli. Lapisan bisa seperti bubuk hitam.",
+            meaning: "Api bisa merambat di permukaan jelaga sehingga tegangan busi turun. Gejalanya sulit hidup, tersendat saat digas, dan bahan bakar terasa lebih boros. NGK memasukkan campuran kaya, heat range terlalu dingin, kompresi rendah, timing terlalu mundur, dan celah terlalu besar ke dalam keluarga endapan gelap ini.",
+            causes: [
+                "Campuran kaya: filter udara tersumbat, permukaan pelampung atau jarum karburator aus, injektor menetes, atau tekanan bahan bakar di atas spek model.",
+                "Busi terlalu dingin untuk pemakaian pendek dan idle panjang, sehingga ujung jarang mencapai sekitar 450°C.",
+                "Pengapian lemah atau terlambat: tutup busi, kabel, koil, CDI atau ECU, dan celah yang sudah melebar.",
+                "Kompresi rendah sehingga campuran tidak terbakar tuntas.",
+                "Pada 2 langkah, oli samping terlalu banyak juga bisa menghitamkan, tetapi biasanya terasa lebih basah. Konfirmasi teksturnya."
+            ],
+            checks: [
+                "Filter udara terhadap cahaya. Filter yang tersumbat membuat campuran kaya pada motor karburator.",
+                "Celah busi dibanding manual. Pada busi kawat halus, geser hanya elektroda massa.",
+                "Tutup busi resistif sering berkode 5 kilo-ohm. Ukur dan bandingkan spek bagian itu. Jangan memakai satu ambang kilo-ohm untuk semua koil. Kumparan primer, kumparan sekunder, dan tutup busi punya rentang yang berbeda.",
+                "Uji kompresi sesuai prosedur manual. Beberapa tetes oli ke silinder lalu ukur lagi: naik jelas menguatkan kecurigaan ring, tidak naik menguatkan kecurigaan katup atau paking. Uji ini petunjuk, bukan putusan tunggal.",
+                "Pada motor injeksi, baca kode gangguan. Tekanan pompa hanya dibanding angka di buku model tersebut."
+            ],
+            actions: [
+                "Benahi penyebabnya. Mengelas busi saja membuat jelaga kembali.",
+                "Busi yang sudah parah dan api merambat di keramik lebih aman diganti daripada disikat terus.",
+                "Heat range lebih panas hanya jika pemakaian memang membuat busi bawaan terlalu dingin. Naikkan satu tingkat menurut arah merek itu, lalu baca ulang.",
+                "Sikat kawat halus boleh pada busi nikel. Jangan menyikat elektroda tengah iridium atau platinum."
+            ],
+            pitfalls: [
+                "Ruangan gelap dan lensa tertutup juga menghasilkan RGB hitam. Aplikasi ini menolak sampel yang terlalu gelap, tetapi bidikan bayangan di pinggir insulator tetap bisa mengecoh.",
+                "Kebocoran udara intake biasanya membuat campuran kurus dan ujung lebih pucat, bukan jelaga. Jangan menjadikan kebocoran vakum sebagai penyebab otomatis busi hitam."
+            ]
+        },
+        oil: {
+            severity: "danger",
+            title: "Oli di ruang bakar",
+            summary: "Ujung basah, hitam, dan licin oleh oli. Kesimpulan ini memakai pengamatan basah atau asap biru, karena kamera tidak bisa membedakan kilap oli dari jelaga kering.",
+            see: "Lapisan tetap basah setelah beberapa menit, licin, dan berbau oli. Asap knalpot biru, terutama pada pola yang khas di bawah.",
+            meaning: "Oli pelumas masuk ke ruang bakar, menempel di ujung busi, dan membuat api gagal. Mengganti busi tanpa menghentikan jalur oli hanya bertahan sebentar.",
+            causes: [
+                "Seal batang katup pada mesin 4 langkah: asap biru saat hidup setelah motor didiamkan, atau saat tutup gas, lalu berkurang ketika mesin sudah jalan stabil.",
+                "Ring atau dinding silinder: asap biru saat digas dari putaran rendah. Kompresi kering sering rendah dan naik setelah uji tetes oli.",
+                "Oli terlalu penuh, atau selang napas bak mesin tersumbat sehingga tekanan mendorong oli. Motor 4 langkah umumnya memakai selang napas, bukan katup PCV mobil.",
+                "Pada 2 langkah: setelan pompa oli terlalu banyak, atau campur bahan bakar terlalu kaya oli. Sedikit gelap pada 2 langkah bisa wajar. Basah pekat dan berasap tidak wajar."
+            ],
+            checks: [
+                "Pastikan basahnya oli, bukan bensin. Bensin menguap dan baunya tajam. Oli tetap licin.",
+                "Catat kapan asap biru muncul: awal hidup, saat tutup gas, atau saat digas. Polanya membedakan seal katup dan ring lebih baik daripada warna rata-rata.",
+                "Uji kompresi kering dan dengan beberapa tetes oli. Jangan menggenangi silinder.",
+                "Periksa level oli dan selang napas sebelum membuka mesin.",
+                "Jika hanya satu silinder yang basah pada mesin banyak silinder, curigai seal atau ring silinder itu, bukan setelan bahan bakar seluruh mesin."
+            ],
+            actions: [
+                "Ganti busi yang sudah berlapis oli, tetapi anggap busi baru sebagai alat pantau, bukan perbaikan.",
+                "Jangan menurunkan oli 2 langkah di bawah spek hanya untuk membuat busi lebih bersih. Kekurangan oli bisa membuat piston macet.",
+                "Pada 4 langkah berkopling basah, pakai oli JASO MA atau MA2. Jangan mengganti ke oli mobil Energy Conserving.",
+                "Turun mesin atau ganti seal hanya setelah pola asap dan uji kompresi mengarah ke sana."
+            ],
+            pitfalls: [
+                "Menganggap setiap busi hitam sebagai ring aus. Jelaga kering jauh lebih sering berasal dari campuran, filter, heat range, atau pengapian.",
+                "Menaksir biaya overhaul dari foto. Biaya tergantung model dan bagian yang benar-benar aus."
+            ]
+        },
+        flood: {
+            severity: "warning",
+            title: "Basah bahan bakar",
+            summary: "Ujung basah oleh bensin, biasanya bersama jelaga. Ini banjir atau campuran sangat kaya, bukan bukti ring aus.",
+            see: "Bau bensin tajam, cairan menguap, tidak licin seperti oli. Mesin sering susah hidup dan knalpot berbau bensin atau berasap hitam.",
+            meaning: "Bahan bakar berlebih atau api tidak menyala, sehingga bensin membasahi ujung. Elektroda bisa normal. Jangan masuk ke pekerjaan ring hanya karena busi hitam dan basah.",
+            causes: [
+                "Injektor menetes, pelampung karburator tenggelam, atau choke atau enrichment macet.",
+                "Tidak ada api: busi, tutup, koil, atau pengapian, sehingga bahan bakar tidak terbakar.",
+                "Berkali-kali menghidupkan mesin tanpa pembakaran menenggelamkan silinder.",
+                "Filter udara sangat tersumbat pada motor karburator."
+            ],
+            checks: [
+                "Keringkan atau ganti busi, lalu periksa apakah ada api saat mengengkol dengan busi diletakkan pada massa mesin. Jauhkan dari uap bensin.",
+                "Pada karburator, periksa jarum pelampung. Pada injeksi, jangan membongkar injektor tanpa prosedur tekanan dan kode gangguan.",
+                "Lihat asap. Hitam menguatkan bahan bakar berlebih. Biru mengalihkan kecurigaan ke oli."
+            ],
+            actions: [
+                "Pulihkan api dan hentikan sumber bensin berlebih.",
+                "Setelah mesin hidup normal beberapa menit pada beban ringan, baca busi lagi. Warna banjir bukan warna setelan jalan."
+            ],
+            pitfalls: [
+                "Mengeringkan busi lalu langsung menyimpulkan mesin sehat. Penyebab banjir masih ada jika tidak dicari."
+            ]
+        },
+        pale: {
+            severity: "warning",
+            title: "Ujung pucat, elektroda perlu dilihat",
+            summary: "Insulator abu-abu sangat muda atau putih tipis, tanpa bukti lepuh. Bisa campuran kurus, bisa pembakaran bersih, bisa busi yang baru disikat.",
+            see: "Hampir tidak ada kerak. Tepi elektroda masih siku jika belum panas berlebih. Tidak ada lelehan logam.",
+            meaning: "Warna pucat saja belum berarti mesin akan rusak. Campuran kurus memang membuat ujung lebih panas dan bisa berlanjut menjadi panas berlebih. Yang membedakan adalah elektroda: masih utuh berarti belum bukti kerusakan panas, terkikis berarti sudah panas berlebih.",
+            causes: [
+                "Udara palsu di sambungan intake, manifold, atau karburator yang longgar.",
+                "Bahan bakar kurang dari spek: filter bensin, pompa lemah, jet terlalu kecil, atau injektor tersumbat.",
+                "Pemakaian boros panas dengan campuran yang memang bersih, tanpa kerusakan.",
+                "Busi baru atau baru dibersihkan, sehingga belum punya warna operasi."
+            ],
+            checks: [
+                "Lihat elektroda dengan kaca pembesar. Siku masih ada atau sudah membulat dan terkikis.",
+                "Dengarkan perubahan putaran saat meneteskan sedikit pembersih karburator yang aman di sekitar intake, hanya pada ruang berventilasi dan jauh dari api. Perubahan putaran menguatkan kebocoran udara. Jangan menyemprot sembarangan ke sensor.",
+                "Bandingkan suplai bahan bakar dengan prosedur buku model, bukan dengan tekanan motor lain."
+            ],
+            actions: [
+                "Jangan menaikkan jet atau mengubah map hanya dari foto.",
+                "Jika elektroda masih utuh dan mesin tidak knocking, catat sebagai pucat dan uji jalan pada kondisi yang sama, lalu baca lagi.",
+                "Jika ada knocking, tarikan ngorok, atau elektroda mulai terkikis, perlakukan sebagai panas berlebih."
+            ],
+            pitfalls: [
+                "Mengganti ke busi lebih dingin hanya karena warna bersih. Busi yang terlalu dingin akan kembali berjelaga.",
+                "Flash kamera membuat insulator cokelat terlihat putih. Pratinjau sampel di hasil harus terlihat seperti busi, bukan kilau."
+            ]
+        },
+        overheat: {
+            severity: "danger",
+            title: "Panas berlebih",
+            summary: "Insulator putih kapur, kadang melepuh atau mengilap, dan elektroda terkikis, membulat, atau kebiruan. NGK menyebut deposit yang meleleh membuat ujung insulator mengilap.",
+            see: "Putih tidak hanya karena bersih. Ada tanda panas pada logam elektroda atau permukaan insulator yang melepuh. Ground strap bisa terlihat terbakar di ujung.",
+            meaning: "Suhu ujung kemungkinan melewati daerah aman di atas kira-kira 800°C. Panas ujung harus mengalir ke rumah busi lalu ke kepala silinder. Ulir kotor, busi kendor, atau dudukan yang tidak pas memutus jalur itu.",
+            causes: [
+                "Heat range terlalu panas untuk beban mesin.",
+                "Campuran kurus atau udara palsu.",
+                "Pengapian terlalu maju.",
+                "Oktan lebih rendah daripada tuntutan mesin, sering bersama detonasi.",
+                "Pendinginan terganggu: sirip tertutup lumpur pada mesin udara, oli kurang atau mutu salah, atau pada mesin radiator: cairan kurang, kipas, atau sirkulasi. Jangan mencari thermostat pada motor yang tidak memakainya.",
+                "Modifikasi filter, knalpot, atau kompresi tanpa meninjau heat range."
+            ],
+            checks: [
+                "Pastikan foto tidak silau. Elektroda yang masih siku dan hitam di bagian dalam biasanya bukan busi meleleh.",
+                "Cek kekencangan dan kebersihan ulir setelah mesin dingin. Jangan memaksa ulir yang seret.",
+                "Dengarkan knocking saat beban. Periksa RON yang dipakai terhadap permintaan pabrik motor.",
+                "Pada mesin beradiator, periksa level cairan saat dingin dan apakah kipas bekerja. Pada mesin bersirip, bersihkan lumpur di antara sirip."
+            ],
+            actions: [
+                "Jangan memaksa perjalanan jika elektroda sudah terkikis atau mesin knocking.",
+                "Ganti busi. Perbaiki penyebab panas sebelum mengubah heat range. Jika heat range memang terlalu panas, pilih satu tingkat lebih dingin menurut arah merek itu.",
+                "Pada NGK standar, angka lebih besar lebih dingin: dari 6 ke 7, bukan dari 7 ke 6. Pada Champion arahnya terbalik.",
+                "Setelah perbaikan, baca ulang busi pada beban yang sama, bukan setelah idle."
+            ],
+            pitfalls: [
+                "Membalik arah heat range NGK. C7 lebih dingin daripada C6.",
+                "Menganggap setiap insulator putih sebagai piston yang sudah rusak. Putih bersih tanpa kerusakan elektroda masih bisa hanya campuran bersih atau sampel silau."
+            ]
+        },
+        preignition: {
+            severity: "danger",
+            title: "Pre-ignition",
+            summary: "Campuran terbakar sebelum percikan karena titik panas. Tanda yang menentukan adalah elektroda yang meleleh atau hilang, bukan rata-rata warna pada foto.",
+            see: "Elektroda tengah atau elektroda massa tumpul karena lelehan, ujungnya hilang, atau ada manik logam. Insulator sering putih dan melepuh.",
+            meaning: "Titik panas menyalakan campuran terlalu awal. Suhu dan tekanan naik sangat cepat. Mahkota piston bisa berlubang. Penyebab titik panas antara lain busi yang terlalu panas, kerak yang menyala, timing yang terlalu maju, atau detonasi yang sudah parah.",
+            causes: [
+                "Heat range terlalu panas.",
+                "Pengapian terlalu maju.",
+                "Campuran kurus pada beban tinggi.",
+                "Kerak yang menjadi bara, termasuk abu aditif yang tebal.",
+                "Oktan terlalu rendah untuk rasio kompresi."
+            ],
+            checks: [
+                "Jangan mengengkol berulang sebelum lubang busi dilihat. Cari pecahan logam.",
+                "Uji kompresi setelah kondisi aman. Kompresi yang jatuh menguatkan kerusakan piston atau ring.",
+                "Periksa apakah busi yang terpasang sekalian salah kode, terlalu panjang, atau tidak sesuai reach."
+            ],
+            actions: [
+                "Hentikan pemakaian. Ganti busi hanya setelah penyebab panas ditinjau.",
+                "Pilih busi lebih dingin satu tingkat jika heat range memang terlalu panas, dengan dimensi ulir yang sama.",
+                "Periksa timing dan RON. Jangan hanya memasang busi baru lalu menarik mesin seperti semula."
+            ],
+            pitfalls: [
+                "Menyimpulkan pre-ignition dari insulator putih tanpa melihat elektroda meleleh.",
+                "Memasang busi dengan reach lebih panjang sehingga elektroda terpukul piston. Itu kerusakan mekanis, bukan pre-ignition."
+            ]
+        },
+        detonation: {
+            severity: "danger",
+            title: "Detonasi",
+            summary: "Gelombang tekanan membentur ruang bakar. Pada busi, petunjuk klasiknya insulator ujung yang pecah atau terkelupas, bintik-bintik, atau elektroda massa yang patah tanpa bekas pukulan benda asing.",
+            see: "Retak halus di ujung insulator, serpihan keramik, atau elektroda massa yang patah dengan sisa yang terkikis. Bandingkan dengan busi yang terjatuh: jatuh biasanya merusak sebelum dipakai dan meninggalkan bekas benturan yang kasar.",
+            meaning: "Detonasi adalah pembakaran yang meledak setelah api menyala, biasanya karena oktan, timing, campuran kurus, atau titik panas. Pre-ignition berbeda: pembakaran dimulai sebelum percikan. Keduanya bisa saling menyusul dan sama-sama berbahaya bagi piston.",
+            causes: [
+                "RON lebih rendah dari tuntutan mesin.",
+                "Pengapian terlalu maju.",
+                "Campuran kurus pada beban.",
+                "Kerak karbon yang menjadi titik panas.",
+                "Beban berat di putaran terlalu rendah."
+            ],
+            checks: [
+                "Pastikan pecahnya bukan karena busi terjatuh atau kunci busi yang miring.",
+                "Tanyakan bahan bakar yang terakhir dipakai dan bandingkan dengan RON yang diminta pabrik.",
+                "Jika motor dimodifikasi kompresinya, oktan lama bisa menjadi tidak cukup."
+            ],
+            actions: [
+                "Ganti busi yang insulatornya retak. Serpihan keramik di silinder harus ditangani, tidak dibiarkan.",
+                "Kembalikan timing ke spek. Jangan memajukan pengapian untuk mencari tarikan tanpa membaca busi ulang.",
+                "Pakai RON yang diminta. Hentikan aditif oktan berferosen."
+            ],
+            pitfalls: [
+                "Mengira setiap knocking ringan sudah memecahkan busi. Tetap lihat insulatornya.",
+                "Menyetel campuran lebih kaya hanya untuk menyembunyikan knocking, tanpa meninjau oktan dan timing."
+            ]
+        },
+        ash: {
+            severity: "warning",
+            title: "Kerak abu",
+            summary: "Kerak kering berwarna krem, putih kecokelatan, atau abu-abu muda, seperti tepung. Bukan jelaga hitam dan bukan insulator yang melepuh.",
+            see: "Mengapur di hidung insulator atau di elektroda. Kering. Kadang menutup celah jika sudah tebal.",
+            meaning: "NGK menyebut endapan firing end dipengaruhi kebocoran oli, mutu bahan bakar, dan lama pemakaian. Abu berasal dari aditif oli atau bahan bakar yang tidak habis terbakar. Lapisan tebal bisa menjadi titik panas.",
+            causes: [
+                "Oli ikut terbakar, walaupun konsumsi belum dramatis.",
+                "Oli dengan aditif abu yang tinggi, atau interval oli yang jauh melewati anjuran manual.",
+                "Aditif bahan bakar yang dipakai terus-menerus.",
+                "Umur busi yang sudah panjang sehingga kerak menumpuk."
+            ],
+            checks: [
+                "Kertas putih di bawah ujung: kerak abu jatuh sebagai serbuk, jelaga mengotori hitam, oli meninggalkan noda licin.",
+                "Catat pemakaian oli per jarak sesuai manual, bukan dari satu foto.",
+                "Lihat apakah kerak menutup celah."
+            ],
+            actions: [
+                "Ganti busi jika kerak sudah tebal atau menutup celah. Abu tidak selalu hilang dengan menggas di jalan.",
+                "Pakai oli sesuai spek motor. Pada kopling basah, JASO MA2 lebih aman daripada oli mobil.",
+                "Jika kerak cepat kembali, cari jalur oli dengan pola asap dan uji kompresi."
+            ],
+            pitfalls: [
+                "Menyebut semua kerak krem sebagai bensin oplosan. Abu oli dan abu aditif terlihat mirip.",
+                "Membersihkan kerak lalu memasang lagi busi yang elektrodanya sudah aus."
+            ]
+        },
+        additive: {
+            severity: "warning",
+            title: "Kerak aditif merah",
+            summary: "Kerak merah bata, oranye, atau seperti karat kering pada insulator dan elektroda. Ini bukan cokelat pembakaran yang sehat.",
+            see: "Warna lebih merah daripada tan. Sering berbubuk. Pada motor yang baru diberi pengangkat oktan, kerak muncul di busi dan kadang di sensor oksigen.",
+            meaning: "Ferosen meninggalkan oksida besi. MMT meninggalkan endapan mangan. Keduanya dipakai dalam sebagian pengangkat oktan. Kerak bisa menghantar listrik pada suhu kerja sehingga mesin pincang. Bensin bertimbal bukan penjelasan yang biasa untuk motor sekarang.",
+            causes: [
+                "Pemakaian octane booster berferosen atau MMT.",
+                "Bahan bakar berulang dari sumber yang menambahkan aditif logam.",
+                "Lebih jarang: partikel karat tangki yang ikut terbakar. Karat tangki biasanya bersama kotoran di filter dan warna yang tidak merata."
+            ],
+            checks: [
+                "Tanyakan aditif yang baru dipakai.",
+                "Lihat filter bahan bakar dan dasar tangki jika kerak disertai partikel kasar.",
+                "Pada motor injeksi yang tetap pincang setelah busi diganti, periksa sensor oksigen sesuai manual. Jangan mengganti sensor hanya karena warna busi."
+            ],
+            actions: [
+                "Hentikan aditif. Ganti busi yang sudah berlapis.",
+                "Pakai bahan bakar dengan RON yang memang dibutuhkan, bukan RON rendah ditambah booster.",
+                "Jika gejala hilang setelah busi baru dan tanpa aditif, penyebabnya ada di kerak itu."
+            ],
+            pitfalls: [
+                "Menganggap cokelat kemerahan yang halus selalu ferosen. Sebagian bahan bakar biasa meninggalkan tan kemerahan. Ferosen cenderung lebih bata dan berkerak.",
+                "Menaikkan RON dengan cairan tak dikenal lalu membaca busi kuning atau merah sebagai heat range."
+            ]
+        },
+        glaze: {
+            severity: "warning",
+            title: "Glazur pada insulator",
+            summary: "Lapisan seperti kaca, kuning, cokelat mengilap, atau cokelat muda yang licin dan kering. Bukan oli basah.",
+            see: "Kilapnya seperti pernis. Kuku tidak mengangkat bubuk. Pada suhu tinggi lapisan ini bisa menghantar dan membuat pincang saat putaran naik.",
+            meaning: "Endapan meleleh lalu membeku. NGK menghubungkan ujung yang mengilap dengan panas berlebih. Jalur lain yang dikenal di bengkel: busi yang agak dingin lama dipakai pelan, endapan menumpuk, lalu putaran tinggi mendadak melelehkan endapan sekaligus.",
+            causes: [
+                "Lonjakan suhu setelah ujung lama berada di bawah suhu pembersihan diri.",
+                "Heat range tidak sesuai.",
+                "Campuran kurus atau timing yang membuat suhu melonjak.",
+                "Aditif yang meleleh menjadi lapisan kaca."
+            ],
+            checks: [
+                "Bedakan dengan oli: glazur kering dan keras, oli licin dan berbau.",
+                "Tanyakan pola pakai. Idle panjang lalu langsung digeber menguatkan jalur leleh endapan.",
+                "Periksa elektroda. Jika sudah terkikis, gabungkan dengan diagnosis panas berlebih."
+            ],
+            actions: [
+                "Ganti busi. Mengikis glazur jarang bersih dan bisa merusak keramik.",
+                "Naikkan suhu mesin secara bertahap setelah busi baru, jangan dari dingin langsung ke putaran tinggi yang lama.",
+                "Cari penyebab lonjakan suhu jika elektroda juga terkikis."
+            ],
+            pitfalls: [
+                "Flash membuat keramik biasa terlihat mengilap. Lihat busi dengan cahaya menyamping, bukan dengan senter dari depan lensa."
+            ]
+        },
+        splash: {
+            severity: "warning",
+            title: "Splash fouling",
+            summary: "Bercak hitam tersebar di atas insulator yang relatif lebih bersih, seperti percikan, bukan lapisan jelaga yang rata.",
+            see: "Pulau-pulau hitam pada dasar yang cokelat atau pucat. Sampel kamera yang mencampur logam, bayangan, dan keramik juga terlihat belang. Pratinjau sampel harus dicek.",
+            meaning: "Endapan lama lepas saat ujung mendadak panas, lalu sebagian menempel lagi. Sering muncul setelah mesin yang lama berjelaga diajak bekerja keras. Itu sisa peristiwa lama, bukan selalu kerusakan baru.",
+            causes: [
+                "Jelaga atau oli ringan yang sudah ada, lalu suhu ujung melonjak.",
+                "Busi baru saja dibersihkan sebagian.",
+                "Bidikan yang mengambil dua permukaan sekaligus."
+            ],
+            checks: [
+                "Lihat pratinjau. Jika belangnya adalah tepi logam dan keramik, ambil ulang dengan hidung insulator memenuhi bingkai.",
+                "Jika bercak benar ada di insulator, bersihkan atau ganti, jalankan pada kondisi normal, lalu baca lagi esoknya pada kondisi yang sama."
+            ],
+            actions: [
+                "Jangan mengubah jet atau membuka mesin karena satu busi belang.",
+                "Jika pembacaan berikut kembali hitam rata, ikuti jalur jelaga kering.",
+                "Jika pembacaan berikut cokelat merata, peristiwa sebelumnya sudah lewat."
+            ],
+            pitfalls: [
+                "Mengira setiap foto buram sebagai splash fouling."
+            ]
+        },
+        worn: {
+            severity: "warning",
+            title: "Elektroda aus",
+            summary: "Warna bisa tetap cokelat yang sehat, tetapi elektroda membulat dan celah melebar. Ini umur pakai, bukan setelan yang salah.",
+            see: "Sisi elektroda yang tadinya siku menjadi bulat. Celah lebih besar daripada spek. Insulator tidak melepuh.",
+            meaning: "Tegangan yang dibutuhkan untuk melompat naik. Mesin sulit hidup atau tersendat pada beban walaupun warna masih baik.",
+            causes: [
+                "Kilometer dan jam pakai. Busi nikel biasanya lebih cepat aus daripada iridium atau platinum, tetapi interval tetap mengikuti buku model, bukan satu angka kilometer untuk semua motor.",
+                "Panas dan campuran kurus mempercepat keausan, walaupun warna belum putih kapur."
+            ],
+            checks: [
+                "Ukur celah dengan alat yang sesuai. Pada kawat halus, jangan menyelipkan feeler dengan kasar.",
+                "Bandingkan dengan busi baru berkode sama agar bentuk ausnya terlihat."
+            ],
+            actions: [
+                "Ganti dengan kode yang sama: diameter, reach, heat range, resistor, dan celah.",
+                "Jangan menaikkan heat range hanya karena busi lama aus tetapi warnanya normal."
+            ],
+            pitfalls: [
+                "Menyetel celah busi iridium dengan menarik elektroda tengah.",
+                "Memasang busi murah dengan reach berbeda karena ulirnya sama."
+            ]
+        },
+        bridged: {
+            severity: "danger",
+            title: "Celah tertutup kerak",
+            summary: "Kerak menghubungkan elektroda tengah dan elektroda massa sehingga tidak ada loncatan api.",
+            see: "Benang jelaga, abu, atau oli kering yang menyambung kedua elektroda. Mesin mati total pada silinder itu atau tidak bisa hidup.",
+            meaning: "Ini fouling yang sudah menutup celah, bukan sekadar warna. Penyebabnya tetap jelaga, oli, atau abu. Pada 2 langkah, campuran oli yang terlalu banyak sering menjadi sumbernya.",
+            causes: [
+                "Jelaga kaya yang dibiarkan.",
+                "Oli 4 langkah atau oli samping 2 langkah yang masuk terlalu banyak.",
+                "Abu yang menumpuk sampai menyambung celah."
+            ],
+            checks: [
+                "Lihat sambungan kerak secara langsung. Foto dari jauh sering tidak memperlihatkannya.",
+                "Pada 2 langkah, periksa setelan pompa atau takaran campur terhadap manual."
+            ],
+            actions: [
+                "Ganti busi. Membersihkan jembatan tanpa memperbaiki sumbernya hanya bertahan sebentar.",
+                "Jangan mengurangi oli 2 langkah sampai di bawah spek."
+            ],
+            pitfalls: [
+                "Mengikir sambungan lalu memakai kembali busi yang elektrodanya sudah rusak."
+            ]
+        },
+        mechanical: {
+            severity: "danger",
+            title: "Kerusakan mekanis",
+            summary: "Elektroda bengkok, patah karena terpukul, atau insulator pecah oleh benturan. Ini bukan warna campuran.",
+            see: "Bekas pukulan, elektroda massa tertekuk ke samping, atau keramik pecah besar. Bisa terjadi karena busi terjatuh sebelum dipasang, benda asing di silinder, atau reach busi terlalu panjang sehingga menyentuh piston.",
+            meaning: "Pecahan di ruang bakar bisa merusak piston dan katup. Memanaskan mesin untuk melihat warna tidak menyelesaikan apa pun.",
+            causes: [
+                "Busi terjatuh atau kunci busi yang mencongkel keramik.",
+                "Kode busi salah, terutama panjang ulir.",
+                "Benda asing masuk saat busi dilepas di tempat berdebu."
+            ],
+            checks: [
+                "Bandingkan panjang ulir dengan busi bawaan sebelum memasang yang baru.",
+                "Terangi lubang busi. Jangan mengengkol jika ada pecahan.",
+                "Jika pecahnya hanya di ujung dan elektroda terkikis halus, pertimbangkan detonasi, bukan jatuh."
+            ],
+            actions: [
+                "Keluarkan pecahan sebelum mesin dihidupkan.",
+                "Pasang busi berkode benar. Ganti busi yang terjatuh walaupun retaknya kecil."
+            ],
+            pitfalls: [
+                "Memaksa busi retak dengan menambah torsi. Keramik yang retak bisa lepas di dalam silinder."
+            ]
+        },
+        dark_unknown: {
+            severity: "warning",
+            title: "Ujung gelap, jenisnya belum ditentukan",
+            summary: "Warna berada di keluarga hitam, tetapi kamera tidak tahu permukaan itu kering, basah oli, atau basah bensin. Tiga jalur itu perbaikannya berbeda.",
+            see: "Pilih pengamatan di atas setelah memegang busi. Kering doff mengarah ke jelaga. Licin berbau oli mengarah ke oli. Bau bensin yang menguap mengarah ke banjir bahan bakar.",
+            meaning: "Nilai RGB gelap tidak cukup untuk membuka mesin. Sebagian besar busi hitam di bengkel sekolah adalah jelaga kering, tetapi busi oli juga hitam. Yang memisahkan adalah sentuhan, bau, dan asap.",
+            causes: [
+                "Jelaga: campuran kaya, busi terlalu dingin, pengapian lemah, kompresi rendah, atau terlalu banyak idle.",
+                "Oli: seal katup, ring, napas mesin, oli terlalu penuh, atau oli 2 langkah berlebih.",
+                "Bensin: injektor atau pelampung, tidak ada api, atau mesin ditenggelamkan saat distarter."
+            ],
+            checks: [
+                "Sentuh dengan sarung dan cium. Jangan membaui uap bensin dari dekat dalam waktu lama.",
+                "Lihat asap pada pola yang sudah dicatat, bukan dari satu tarikan gas di tempat.",
+                "Baru setelah jenisnya jelas, ikuti pemeriksaan jalur itu."
+            ],
+            actions: [
+                "Jangan mengganti ring, seal, atau jet sebelum tekstur dipilih.",
+                "Ambil ulang foto jika pratinjau terlihat seperti bayangan, bukan seperti keramik."
+            ],
+            pitfalls: [
+                "Memercayai nama kerusakan hanya karena sebuah aplikasi memberi skor tinggi pada warna hitam."
+            ]
+        },
+        invalid: {
+            severity: "invalid",
+            title: "Sampel tidak bisa dibaca sebagai ujung busi",
+            summary: "Warna atau cahaya pada bingkai tidak cukup aman untuk didiagnosis. Tidak ada saran bongkar mesin dari bidikan ini.",
+            see: "Pratinjau harus dipenuhi hidung insulator. Jika yang terlihat meja, jari, kemasan, atau kilau putih, ambil ulang.",
+            meaning: "Menolak sampel adalah bagian dari akurasi. Busi hitam palsu dari ruangan gelap dan busi putih palsu dari dinding atau flash adalah kesalahan terbesar pembaca warna otomatis.",
+            causes: [
+                "Cahaya terlalu rendah atau terlalu banyak piksel silau.",
+                "Hue jenuh hijau, biru, atau ungu yang bukan kerak busi.",
+                "Bingkai tidak terisi insulator."
+            ],
+            checks: [
+                "Pindah ke cahaya siang atau LED putih di samping busi, bukan lampu dari arah lensa.",
+                "Isi bingkai. Dekatkan kamera sampai hidung insulator saja yang ada di dalam kotak.",
+                "Jika memakai galeri, crop longgar dengan ujung busi di tengah lalu coba lagi."
+            ],
+            actions: [
+                "Ulangi pengambilan. Jangan memakai hasil ini di laporan sebagai kondisi mesin."
+            ],
+            pitfalls: [
+                "Memaksa membaca angka RGB dari sampel yang ditolak."
+            ]
         }
-    }
-
-    function monitorLighting() {
-        setInterval(() => {
-            const ctx = canvas.getContext('2d');
-            canvas.width = video.videoWidth;
-            canvas.height = video.videoHeight;
-            ctx.drawImage(video, 0, 0);
-            
-            const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height).data;
-            let brightness = 0;
-            for(let i = 0; i < imgData.length; i += 4) {
-                brightness += (imgData[i] + imgData[i+1] + imgData[i+2]) / 3;
-            }
-            brightness = (brightness / (imgData.length / 4)).toFixed(0);
-            
-            let lightStatus = brightness < 60 ? 'TOO DARK ⚠️' : 
-                             brightness > 200 ? 'TOO BRIGHT ⚠️' : 
-                             'OPTIMAL ✓';
-            document.getElementById('lighting').innerText = lightStatus;
-            
-            frameCount++;
-            document.getElementById('samples').innerText = frameCount;
-        }, 1000);
-    }
-
-    snapBtn.onclick = () => {
-        loading.classList.add('active');
-        
-        setTimeout(() => {
-            const ctx = canvas.getContext('2d', { willReadFrequently: true });
-            canvas.width = video.videoWidth;
-            canvas.height = video.videoHeight;
-            ctx.drawImage(video, 0, 0);
-
-            // MULTI-POINT SAMPLING untuk akurasi tinggi
-            const sampleSize = 60;
-            const centerX = canvas.width / 2;
-            const centerY = canvas.height / 2;
-            
-            let totalR = 0, totalG = 0, totalB = 0;
-            let sampleCount = 0;
-            
-            // 5-point sampling pattern (center + 4 corners offset)
-            const offsets = [
-                {x: 0, y: 0},           // center
-                {x: -20, y: -20},       // top-left
-                {x: 20, y: -20},        // top-right
-                {x: -20, y: 20},        // bottom-left
-                {x: 20, y: 20}          // bottom-right
-            ];
-            
-            offsets.forEach(offset => {
-                const x = centerX + offset.x - sampleSize / 2;
-                const y = centerY + offset.y - sampleSize / 2;
-                const imgData = ctx.getImageData(x, y, sampleSize, sampleSize).data;
-                
-                for(let i = 0; i < imgData.length; i += 4) {
-                    // Gamma correction + perceptual weighting
-                    const r = Math.pow(imgData[i] / 255, 2.2);
-                    const g = Math.pow(imgData[i+1] / 255, 2.2);
-                    const b = Math.pow(imgData[i+2] / 255, 2.2);
-                    
-                    totalR += r;
-                    totalG += g;
-                    totalB += b;
-                    sampleCount++;
-                }
-            });
-
-            const avgR = totalR / sampleCount;
-            const avgG = totalG / sampleCount;
-            const avgB = totalB / sampleCount;
-
-            const finalR = Math.round(Math.pow(avgR, 1/2.2) * 255);
-            const finalG = Math.round(Math.pow(avgG, 1/2.2) * 255);
-            const finalB = Math.round(Math.pow(avgB, 1/2.2) * 255);
-
-            analyzeColor(finalR, finalG, finalB);
-        }, 800);
     };
 
-    function analyzeColor(r, g, b) {
-        let match = LIBRARY[0];
-        let minScore = Infinity;
+    const SWATCHES = [
+        { id: "normal", rgb: [168, 132, 98] },
+        { id: "normal", rgb: [150, 118, 90] },
+        { id: "normal", rgb: [176, 154, 136] },
+        { id: "normal", rgb: [158, 114, 86] },
+        { id: "normal", rgb: [186, 162, 132] },
+        { id: "normal", rgb: [140, 124, 108] },
+        { id: "normal", rgb: [158, 156, 150] },
+        { id: "normal", rgb: [142, 140, 134] },
+        { id: "normal", rgb: [172, 168, 160] },
+        { id: "dark", rgb: [72, 70, 66] },
+        { id: "dark", rgb: [52, 50, 48] },
+        { id: "dark", rgb: [34, 33, 32] },
+        { id: "dark", rgb: [24, 23, 22] },
+        { id: "pale", rgb: [198, 196, 190] },
+        { id: "pale", rgb: [186, 184, 178] },
+        { id: "pale", rgb: [206, 204, 198] },
+        { id: "overheat", rgb: [232, 230, 224] },
+        { id: "overheat", rgb: [244, 243, 238] },
+        { id: "overheat", rgb: [224, 222, 214] },
+        { id: "ash", rgb: [196, 184, 158] },
+        { id: "ash", rgb: [176, 164, 142] },
+        { id: "ash", rgb: [210, 198, 174] },
+        { id: "ash", rgb: [164, 154, 136] },
+        { id: "additive", rgb: [158, 78, 48] },
+        { id: "additive", rgb: [176, 98, 60] },
+        { id: "additive", rgb: [138, 62, 40] },
+        { id: "additive", rgb: [186, 112, 74] },
+        { id: "glaze", rgb: [176, 148, 76] },
+        { id: "glaze", rgb: [162, 134, 66] },
+        { id: "glaze", rgb: [148, 120, 58] },
+        { id: "glaze", rgb: [188, 162, 98] }
+    ];
 
-        LIBRARY.forEach(item => {
-            // CIE76 Delta E dengan perceptual weighting
-            const dr = r - item.rgb[0];
-            const dg = g - item.rgb[1];
-            const db = b - item.rgb[2];
-            
-            // Weighted Euclidean (ITU-R BT.709 luma coefficients)
-            const score = Math.sqrt(
-                Math.pow(dr, 2) * 0.2126 +
-                Math.pow(dg, 2) * 0.7152 +
-                Math.pow(db, 2) * 0.0722
-            );
-            
-            if(score < minScore) { 
-                minScore = score; 
-                match = item; 
+    const COLOR_ONLY = {
+        normal: "normal",
+        dark: "dark_unknown",
+        pale: "pale",
+        overheat: "overheat",
+        ash: "ash",
+        additive: "additive",
+        glaze: "glaze"
+    };
+
+    const video = document.getElementById("video");
+    const still = document.getElementById("still");
+    const viewport = document.getElementById("viewport");
+    const reticle = document.getElementById("reticle");
+    const snapBtn = document.getElementById("snap");
+    const torchBtn = document.getElementById("torch");
+    const flipBtn = document.getElementById("flip");
+    const fileInput = document.getElementById("file");
+    const resultEl = document.getElementById("result");
+    const loading = document.getElementById("loading");
+    const loadingText = document.getElementById("loadingText");
+    const work = document.getElementById("work");
+    const lightCanvas = document.getElementById("light");
+
+    const obs = { surface: "unknown", electrode: "unknown", smoke: "unknown", engine: "unknown" };
+    let stream = null;
+    let facing = "environment";
+    let torchOn = false;
+    let busy = false;
+    let usingStill = false;
+    let lightTimer = 0;
+    let lastSample = null;
+    let objectUrl = "";
+
+    SWATCHES.forEach(function (sw) { sw.lab = rgbToLab(sw.rgb[0], sw.rgb[1], sw.rgb[2]); });
+
+    function srgbToLinear(c) {
+        c = c / 255;
+        return c <= 0.04045 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4);
+    }
+
+    function rgbToXyz(r, g, b) {
+        const R = srgbToLinear(r), G = srgbToLinear(g), B = srgbToLinear(b);
+        return [
+            R * 0.4124564 + G * 0.3575761 + B * 0.1804375,
+            R * 0.2126729 + G * 0.7151522 + B * 0.0721750,
+            R * 0.0193339 + G * 0.1191920 + B * 0.9503041
+        ];
+    }
+
+    function labF(t) {
+        const d = 6 / 29;
+        return t > d * d * d ? Math.cbrt(t) : t / (3 * d * d) + 4 / 29;
+    }
+
+    function rgbToLab(r, g, b) {
+        const xyz = rgbToXyz(r, g, b);
+        const fx = labF(xyz[0] / Xn), fy = labF(xyz[1] / Yn), fz = labF(xyz[2] / Zn);
+        return [116 * fy - 16, 500 * (fx - fy), 200 * (fy - fz)];
+    }
+
+    function labToRgb(L, a, b) {
+        const fy = (L + 16) / 116;
+        const fx = fy + a / 500;
+        const fz = fy - b / 200;
+        const finv = function (t) {
+            const d = 6 / 29;
+            return t > d ? t * t * t : 3 * d * d * (t - 4 / 29);
+        };
+        const x = Xn * finv(fx), y = Yn * finv(fy), z = Zn * finv(fz);
+        let R = 3.2404542 * x - 1.5371385 * y - 0.4985314 * z;
+        let G = -0.9692660 * x + 1.8760108 * y + 0.0415560 * z;
+        let B = 0.0556434 * x - 0.2040259 * y + 1.0572252 * z;
+        const comp = function (c) {
+            c = c <= 0.0031308 ? 12.92 * c : 1.055 * Math.pow(Math.max(c, 0), 1 / 2.4) - 0.055;
+            return Math.round(Math.min(1, Math.max(0, c)) * 255);
+        };
+        return [comp(R), comp(G), comp(B)];
+    }
+
+    function deltaE00(lab1, lab2) {
+        const L1 = lab1[0], a1 = lab1[1], b1 = lab1[2];
+        const L2 = lab2[0], a2 = lab2[1], b2 = lab2[2];
+        const C1 = Math.hypot(a1, b1);
+        const C2 = Math.hypot(a2, b2);
+        const Cbar = (C1 + C2) / 2;
+        const Cbar7 = Math.pow(Cbar, 7);
+        const G = 0.5 * (1 - Math.sqrt(Cbar7 / (Cbar7 + Math.pow(25, 7))));
+        const a1p = (1 + G) * a1;
+        const a2p = (1 + G) * a2;
+        const C1p = Math.hypot(a1p, b1);
+        const C2p = Math.hypot(a2p, b2);
+        const hp = function (a, b) {
+            if (a === 0 && b === 0) return 0;
+            let h = Math.atan2(b, a) * 180 / Math.PI;
+            if (h < 0) h += 360;
+            return h;
+        };
+        const h1 = hp(a1p, b1);
+        const h2 = hp(a2p, b2);
+        const dLp = L2 - L1;
+        const dCp = C2p - C1p;
+        let dhp = 0;
+        if (C1p * C2p !== 0) {
+            dhp = h2 - h1;
+            if (dhp > 180) dhp -= 360;
+            else if (dhp < -180) dhp += 360;
+        }
+        const dHp = 2 * Math.sqrt(C1p * C2p) * Math.sin((dhp * Math.PI / 180) / 2);
+        const Lbarp = (L1 + L2) / 2;
+        const Cbarp = (C1p + C2p) / 2;
+        let hbarp;
+        if (C1p * C2p === 0) hbarp = h1 + h2;
+        else if (Math.abs(h1 - h2) <= 180) hbarp = (h1 + h2) / 2;
+        else if (h1 + h2 < 360) hbarp = (h1 + h2 + 360) / 2;
+        else hbarp = (h1 + h2 - 360) / 2;
+        const rad = Math.PI / 180;
+        const T = 1
+            - 0.17 * Math.cos((hbarp - 30) * rad)
+            + 0.24 * Math.cos((2 * hbarp) * rad)
+            + 0.32 * Math.cos((3 * hbarp + 6) * rad)
+            - 0.20 * Math.cos((4 * hbarp - 63) * rad);
+        const dTheta = 30 * Math.exp(-Math.pow((hbarp - 275) / 25, 2));
+        const Cbarp7 = Math.pow(Cbarp, 7);
+        const Rc = 2 * Math.sqrt(Cbarp7 / (Cbarp7 + Math.pow(25, 7)));
+        const Sl = 1 + (0.015 * Math.pow(Lbarp - 50, 2)) / Math.sqrt(20 + Math.pow(Lbarp - 50, 2));
+        const Sc = 1 + 0.045 * Cbarp;
+        const Sh = 1 + 0.015 * Cbarp * T;
+        const Rt = -Math.sin(2 * dTheta * rad) * Rc;
+        const termC = dCp / Sc;
+        const termH = dHp / Sh;
+        return Math.sqrt(Math.pow(dLp / Sl, 2) + termC * termC + termH * termH + Rt * termC * termH);
+    }
+
+    function median(values) {
+        if (!values.length) return 0;
+        const arr = values.slice().sort(function (a, b) { return a - b; });
+        const mid = Math.floor(arr.length / 2);
+        return arr.length % 2 ? arr[mid] : (arr[mid - 1] + arr[mid]) / 2;
+    }
+
+    function mean(values) {
+        let s = 0;
+        for (let i = 0; i < values.length; i++) s += values[i];
+        return values.length ? s / values.length : 0;
+    }
+
+    function std(values, avg) {
+        if (values.length < 2) return 0;
+        let s = 0;
+        for (let i = 0; i < values.length; i++) {
+            const d = values[i] - avg;
+            s += d * d;
+        }
+        return Math.sqrt(s / values.length);
+    }
+
+    function hexOf(rgb) {
+        return "#" + rgb.map(function (v) {
+            const s = Math.max(0, Math.min(255, v)).toString(16);
+            return (s.length === 1 ? "0" : "") + s;
+        }).join("").toUpperCase();
+    }
+
+    function hueChroma(a, b) {
+        const c = Math.hypot(a, b);
+        let h = Math.atan2(b, a) * 180 / Math.PI;
+        if (h < 0) h += 360;
+        return { c: c, h: h };
+    }
+
+    function activeSource() {
+        if (usingStill && still.naturalWidth) {
+            return { el: still, w: still.naturalWidth, h: still.naturalHeight };
+        }
+        return { el: video, w: video.videoWidth, h: video.videoHeight };
+    }
+
+    function mapRectToSource(rect) {
+        const src = activeSource();
+        const view = viewport.getBoundingClientRect();
+        if (!src.w || !src.h || !view.width || !view.height) return null;
+        const scale = Math.max(view.width / src.w, view.height / src.h);
+        const offX = (src.w * scale - view.width) / 2;
+        const offY = (src.h * scale - view.height) / 2;
+        const left = rect.left - view.left;
+        const top = rect.top - view.top;
+        const inset = 0.22;
+        const x = (left + rect.width * inset + offX) / scale;
+        const y = (top + rect.height * inset + offY) / scale;
+        const w = rect.width * (1 - inset * 2) / scale;
+        const h = rect.height * (1 - inset * 2) / scale;
+        const sx = Math.max(0, Math.floor(x));
+        const sy = Math.max(0, Math.floor(y));
+        const sw = Math.max(1, Math.min(src.w - sx, Math.floor(w)));
+        const sh = Math.max(1, Math.min(src.h - sy, Math.floor(h)));
+        if (sw < 8 || sh < 8) return null;
+        return { src: src, sx: sx, sy: sy, sw: sw, sh: sh };
+    }
+
+    function drawRegion(mapped, canvas, dw, dh) {
+        canvas.width = dw;
+        canvas.height = dh;
+        const ctx = canvas.getContext("2d", { willReadFrequently: true });
+        ctx.imageSmoothingEnabled = true;
+        ctx.drawImage(mapped.src.el, mapped.sx, mapped.sy, mapped.sw, mapped.sh, 0, 0, dw, dh);
+        return ctx.getImageData(0, 0, dw, dh);
+    }
+
+    function measurePatch(imageData) {
+        const data = imageData.data;
+        const Ls = [], As = [], Bs = [];
+        let highlights = 0;
+        let crushed = 0;
+        let seen = 0;
+        let darkPx = 0;
+        let lightPx = 0;
+        for (let i = 0; i < data.length; i += 16) {
+            const r = data[i], g = data[i + 1], b = data[i + 2];
+            seen++;
+            const max = Math.max(r, g, b);
+            if (max >= 250) {
+                highlights++;
+                lightPx++;
+                continue;
+            }
+            if (max <= 8) {
+                crushed++;
+                darkPx++;
+                continue;
+            }
+            const lab = rgbToLab(r, g, b);
+            Ls.push(lab[0]);
+            As.push(lab[1]);
+            Bs.push(lab[2]);
+            if (lab[0] < 35) darkPx++;
+            if (lab[0] > 72) lightPx++;
+        }
+        const kept = Ls.length;
+        const L = median(Ls);
+        const a = median(As);
+        const b = median(Bs);
+        const spread = std(Ls, mean(Ls));
+        const hc = hueChroma(a, b);
+        const rgb = kept ? labToRgb(L, a, b) : [0, 0, 0];
+        const highlightRatio = seen ? highlights / seen : 1;
+        const crushedRatio = seen ? crushed / seen : 1;
+        return {
+            lab: [L, a, b],
+            rgb: rgb,
+            hex: hexOf(rgb),
+            L: L,
+            a: a,
+            b: b,
+            c: hc.c,
+            h: kept ? hc.h : 0,
+            spread: spread,
+            kept: kept,
+            seen: seen,
+            highlightRatio: highlightRatio,
+            crushedRatio: crushedRatio,
+            bimodal: seen > 20 && (darkPx / seen) > 0.18 && (lightPx / seen) > 0.18
+        };
+    }
+
+    function rankClasses(lab) {
+        const bestByClass = {};
+        SWATCHES.forEach(function (sw) {
+            const de = deltaE00(lab, sw.lab);
+            if (!bestByClass[sw.id] || de < bestByClass[sw.id].de) {
+                bestByClass[sw.id] = { id: sw.id, de: de };
             }
         });
+        return Object.keys(bestByClass).map(function (k) { return bestByClass[k]; })
+            .sort(function (p, q) { return p.de - q.de; });
+    }
 
-        // Calculate confidence (0-100%)
-        const maxDistance = Math.sqrt(255*255 * 3);
-        const confidence = Math.max(0, (1 - minScore / maxDistance) * 100);
+    function cornerCast(mapped) {
+        const src = mapped.src;
+        const size = Math.max(12, Math.round(Math.min(src.w, src.h) * 0.08));
+        const corners = [
+            [0, 0],
+            [src.w - size, 0],
+            [0, src.h - size],
+            [src.w - size, src.h - size]
+        ];
+        const canvas = lightCanvas;
+        const ctx = canvas.getContext("2d", { willReadFrequently: true });
+        const labs = [];
+        corners.forEach(function (c) {
+            canvas.width = 16;
+            canvas.height = 16;
+            ctx.drawImage(src.el, c[0], c[1], size, size, 0, 0, 16, 16);
+            const img = ctx.getImageData(0, 0, 16, 16);
+            const sample = measurePatch(img);
+            if (sample.kept > 5) labs.push(sample.lab);
+        });
+        if (!labs.length) return null;
+        const a = mean(labs.map(function (v) { return v[1]; }));
+        const b = mean(labs.map(function (v) { return v[2]; }));
+        return { lab: [mean(labs.map(function (v) { return v[0]; })), a, b], c: Math.hypot(a, b), h: hueChroma(a, b).h };
+    }
 
-        // Calculate color properties
-        const brightness = (0.2126*r + 0.7152*g + 0.0722*b).toFixed(0);
-        const max = Math.max(r, g, b);
-        const min = Math.min(r, g, b);
-        const saturation = max === 0 ? 0 : ((max - min) / max * 100).toFixed(0);
-        
-        let hue = 0;
-        if (max !== min) {
-            if (max === r) hue = 60 * ((g - b) / (max - min));
-            else if (max === g) hue = 60 * (2 + (b - r) / (max - min));
-            else hue = 60 * (4 + (r - g) / (max - min));
+    function gateSample(sample, cast) {
+        const reasons = [];
+        let block = "";
+        if (sample.highlightRatio >= 0.25) {
+            block = "glare";
+            reasons.push("Terlalu banyak piksel silau. Dinding putih atau flash bukan busi meleleh.");
+        } else if (sample.kept < 25 || (sample.crushedRatio > 0.6 && sample.L < 15)) {
+            block = "dark";
+            reasons.push("Sampel terlalu gelap atau hampir semua piksel tertolak. Ruangan gelap bukan busi beroli.");
         }
-        if (hue < 0) hue += 360;
-
-        const hex = "#" + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1).toUpperCase();
-        
-        document.getElementById('resCol').style.backgroundColor = hex;
-        document.getElementById('resHex').innerText = `${hex} • RGB(${r}, ${g}, ${b})`;
-        document.getElementById('resName').innerText = match.name;
-        document.getElementById('resInd').innerText = match.ind;
-        document.getElementById('resPen').innerText = match.pen;
-        document.getElementById('resSol').innerText = match.sol;
-        
-        document.getElementById('confidence').style.width = confidence + '%';
-        document.getElementById('confText').innerText = `Confidence: ${confidence.toFixed(1)}% • Match Distance: ${minScore.toFixed(2)}`;
-        
-        const severityEl = document.getElementById('severity');
-        severityEl.innerText = match.severity.toUpperCase();
-        severityEl.className = 'severity-indicator severity-' + match.severity;
-        
-        document.getElementById('brightness').innerText = brightness;
-        document.getElementById('saturation').innerText = saturation + '%';
-        document.getElementById('hue').innerText = hue.toFixed(0) + '°';
-        document.getElementById('matchScore').innerText = (100 - minScore).toFixed(1);
-
-        loading.classList.remove('active');
-        resDiv.style.display = 'block';
-        snapBtn.style.display = 'none';
-        document.getElementById('scanInfo').style.display = 'none';
-        video.pause();
+        const hue = sample.h;
+        const oddHue = sample.c > 22 && hue > 120 && hue < 330;
+        if (!block && (oddHue || sample.c > 58)) {
+            block = "hue";
+            reasons.push("Warna terlalu jenuh untuk kerak busi. Bidik hidung insulator, bukan kemasan, jari, atau meja.");
+        }
+        if (!block && sample.L > 92 && sample.c < 8) {
+            reasons.push("Nilai L* sangat tinggi dan warnanya hampir netral. Kertas, dinding, dan flash terlihat sama dengan busi yang kepanasan. Lihat pratinjau. Panas berlebih hanya kuat bila elektroda terkikis atau meleleh.");
+        }
+        let castPenalty = 0;
+        if (cast && cast.c > 18 && !block) {
+            let dh = Math.abs(cast.h - sample.h);
+            if (dh > 180) dh = 360 - dh;
+            if (dh < 28 && sample.c > 10) {
+                reasons.push("Latar ikut berwarna dengan hue yang mirip sampel. Cahaya sekitar kemungkinan menggeser warna. Hasil tetap ditampilkan dengan keyakinan lebih rendah.");
+                castPenalty = 14;
+            }
+        }
+        return { blocked: block !== "", reasons: reasons, castPenalty: castPenalty };
     }
 
-    function resetScan() {
-        resDiv.style.display = 'none';
-        snapBtn.style.display = 'block';
-        document.getElementById('scanInfo').style.display = 'block';
-        video.play();
+    function confidenceOf(sample, ranked, finalId, gate) {
+        if (!ranked.length || finalId === "invalid") return 8;
+        const best = ranked[0].de;
+        const second = ranked.length > 1 ? ranked[1].de : best + 20;
+        let score = 90 - best * 3.1;
+        const margin = second - best;
+        if (margin < 2) score -= 18;
+        else if (margin < 4) score -= 10;
+        else if (margin < 7) score -= 5;
+        if (sample.spread > 16) score -= 14;
+        else if (sample.spread > 10) score -= 7;
+        if (sample.bimodal) score -= 8;
+        if (sample.highlightRatio > 0.08) score -= 8;
+        score -= gate.castPenalty;
+        if (torchOn && !usingStill) score -= 8;
+        if (finalId === "dark_unknown") score = Math.min(score, 64);
+        if (finalId === "pale") score = Math.min(score, 74);
+        if (finalId === "overheat" && obs.electrode !== "melted" && obs.electrode !== "worn") score = Math.min(score, 70);
+        if (finalId === "overheat" && sample.L > 92 && sample.c < 8 && obs.electrode === "unknown") score = Math.min(score, 58);
+        if (obs.surface !== "unknown" && finalId !== "invalid") score += 6;
+        if (finalId === "preignition" || finalId === "detonation" || finalId === "mechanical" || finalId === "oil" || finalId === "bridged") {
+            score = Math.min(92, score + 4);
+        }
+        return Math.max(6, Math.min(93, Math.round(score)));
     }
 
-    window.onload = startCamera;
+    function refine(sample, ranked, gate) {
+        const notes = gate.reasons.slice();
+        if (gate.blocked) {
+            const eyeNote = "Warna foto ditolak. Kesimpulan ini hanya dari pengamatan mata, bukan dari angka warna.";
+            if (obs.electrode === "melted") return { id: "preignition", notes: notes.concat([eyeNote]), confidence: 56, eye: true };
+            if (obs.electrode === "cracked") return { id: "detonation", notes: notes.concat([eyeNote]), confidence: 52, eye: true };
+            if (obs.electrode === "broken") return { id: "mechanical", notes: notes.concat([eyeNote]), confidence: 52, eye: true };
+            if (obs.surface === "bridged") return { id: "bridged", notes: notes.concat([eyeNote]), confidence: 50, eye: true };
+            return { id: "invalid", notes: notes, confidence: 8, eye: false };
+        }
+        const colorId = ranked.length ? ranked[0].id : "normal";
+        let id = COLOR_ONLY[colorId] || "invalid";
+
+        if (obs.electrode === "melted") id = "preignition";
+        else if (obs.electrode === "cracked") id = "detonation";
+        else if (obs.electrode === "broken") id = "mechanical";
+        else if (obs.surface === "bridged") id = "bridged";
+        else if (obs.surface === "oil") id = "oil";
+        else if (obs.surface === "fuel") id = "flood";
+        else if (obs.surface === "glaze") id = "glaze";
+        else if (obs.surface === "mottled") id = "splash";
+        else if (obs.surface === "dry" && colorId === "dark") id = "carbon";
+        else if (obs.electrode === "worn" && (colorId === "normal" || colorId === "pale")) id = "worn";
+        else if (obs.electrode === "ok" && colorId === "overheat") {
+            id = "pale";
+            notes.push("Elektroda masih utuh. Warna putih tanpa elektroda terkikis belum cukup disebut panas berlebih.");
+        }
+        const eye = id !== (COLOR_ONLY[colorId] || "invalid");
+
+        if (sample.bimodal && obs.surface === "unknown" && id !== "preignition") {
+            notes.push("Warna di dalam bingkai tidak merata. Bisa bercak splash, bisa bidikan yang mencampur logam dan keramik. Lihat pratinjau sebelum memilih.");
+        }
+        if (torchOn && !usingStill) {
+            notes.push("Senter menyala. Cahaya ini menggeser warna ke kuning dan menurunkan keyakinan.");
+        }
+        if (obs.smoke === "blue" && id !== "oil") {
+            notes.push("Asap biru adalah petunjuk oli terbakar. Jika ujung busi tidak basah oli, asap dan waktu pembacaan busi mungkin tidak berasal dari kondisi yang sama. Jangan turun mesin hanya dari pilihan asap.");
+        }
+        if (obs.smoke === "black" && (id === "normal" || id === "pale")) {
+            notes.push("Asap hitam menguatkan campuran kaya, tetapi warna ujung kali ini tidak hitam. Idle atau pembersihan setelah asap itu bisa menghapus jelaganya.");
+        }
+        if (obs.smoke === "white") {
+            notes.push("Asap putih tipis saat mesin dingin sering uap air. Asap putih tebal pada motor beradiator, apalagi berbau manis, mengarah ke cairan pendingin. Itu pemeriksaan paking dan cairan, bukan kesimpulan dari warna busi semata.");
+        }
+        if (obs.engine === "2t" && (id === "oil" || id === "carbon" || id === "bridged" || id === "dark_unknown" || id === "normal")) {
+            notes.push("Mesin 2 langkah memakai oli di ruang bakar. Sedikit gelap bisa wajar. Basah pekat berarti takaran oli atau setelan pompa perlu dibanding manual. Jangan mengurangi oli sampai di bawah spek.");
+        }
+        if (obs.engine === "4t" && id === "oil") {
+            notes.push("Pada 4 langkah, oli di ujung busi bukan dari campur bahan bakar. Cari seal katup, ring, level oli, atau napas bak mesin.");
+        }
+        if (obs.electrode === "worn" && colorId === "overheat" && id === "overheat") {
+            notes.push("Elektroda yang membulat bersama warna putih menguatkan panas berlebih, bukan hanya usia pakai.");
+        }
+        if (ranked.length > 1 && ranked[1].de - ranked[0].de < 3 && obs.electrode === "unknown" && obs.surface === "unknown") {
+            notes.push("Dua kelas warna berdekatan. Pengamatan mata yang memilih di antara keduanya, bukan selisih desimal pada foto.");
+        }
+        const confidence = confidenceOf(sample, ranked, id, gate);
+        return { id: id, notes: notes, confidence: confidence, eye: eye };
+    }
+
+    function bandText(score, eye) {
+        const base = score >= 80
+            ? "Warna cukup dekat dengan acuan kelas ini. Tetap cocokkan tekstur dan elektroda dengan mata."
+            : score >= 60
+                ? "Kemungkinan dari warna saja. Jangan mengubah setelan atau membuka mesin sebelum pemeriksaan di artikel."
+                : score >= 40
+                    ? "Keyakinan lemah. Cocok untuk latihan melihat, bukan untuk keputusan perbaikan."
+                    : "Tidak cukup untuk diagnosis. Ambil ulang atau isi pengamatan mata.";
+        return eye ? base + " Kesimpulan akhir mengikuti pengamatan mata, bukan jarak warna yang tipis." : base;
+    }
+
+    function esc(s) {
+        return String(s).replace(/[&<>"']/g, function (c) {
+            return { "&": "&amp;", "<": "&lt;", ">": "&gt;", "\"": "&quot;", "'": "&#39;" }[c];
+        });
+    }
+
+    function list(items) {
+        return "<ul class=\"tight\">" + items.map(function (item) {
+            return "<li>" + esc(item) + "</li>";
+        }).join("") + "</ul>";
+    }
+
+    function render() {
+        if (!lastSample) return;
+        const ranked = rankClasses(lastSample.lab);
+        const gate = lastSample.gate;
+        const decision = refine(lastSample, ranked, gate);
+        const cond = CONDITIONS[decision.id];
+        const sev = cond.severity;
+        const rgb = lastSample.rgb;
+        const top = ranked.slice(0, 3).map(function (row) {
+            const name = CONDITIONS[COLOR_ONLY[row.id]].title;
+            return "<li>" + esc(name) + " · ΔE00 " + row.de.toFixed(1) + "</li>";
+        }).join("");
+        const noteHtml = decision.notes.length ? "<div class=\"warn-box\"><strong>Catatan bidikan</strong>" + list(decision.notes) + "</div>" : "";
+        resultEl.hidden = false;
+        resultEl.innerHTML =
+            "<article class=\"card\">" +
+            "<div class=\"result-head\">" +
+            "<div class=\"swatch\" style=\"background:" + esc(lastSample.hex) + "\"></div>" +
+            "<div><h3 id=\"resTitle\">" + esc(cond.title) + " <span class=\"sev sev-" + sev + "\">" + esc(sev === "invalid" ? "TIDAK DIBACA" : sev.toUpperCase()) + "</span></h3>" +
+            "<p class=\"small muted\">" + esc(lastSample.hex) + " · RGB " + rgb.join(", ") + "<br>L* " + lastSample.L.toFixed(1) + " · a* " + lastSample.a.toFixed(1) + " · b* " + lastSample.b.toFixed(1) + "</p>" +
+            "<div class=\"bar\" aria-hidden=\"true\"><div style=\"width:" + decision.confidence + "%\"></div></div>" +
+            "<p class=\"small\">Keyakinan warna " + decision.confidence + "%. " + esc(bandText(decision.confidence, decision.eye)) + "</p></div></div>" +
+            "<div class=\"stats\">" +
+            stat("L*", lastSample.L.toFixed(0), "kecerahan CIELAB") +
+            stat("C*", lastSample.c.toFixed(0), "krominasi") +
+            stat("h°", lastSample.h.toFixed(0), "sudut warna") +
+            stat("ΔE00", ranked.length ? ranked[0].de.toFixed(1) : "—", "jarak ke kelas terdekat") +
+            stat("sebaran", lastSample.spread.toFixed(1), "kerataan L* di bingkai") +
+            stat("terpakai", lastSample.kept + "/" + lastSample.seen, "piksel yang tidak silau") +
+            stat("silau", Math.round(lastSample.highlightRatio * 100) + "%", "piksel kepotong") +
+            stat("kedua", ranked[1] ? ranked[1].de.toFixed(1) : "—", "ΔE00 kelas berikut") +
+            "</div></article>" +
+            "<article class=\"card\"><h3>Yang diukur</h3><div class=\"split\"><canvas id=\"patch\" width=\"160\" height=\"160\"></canvas>" +
+            "<p class=\"small\">Kotak ini isi bingkai, setelah diperkecil. Median dihitung di CIELAB, bukan rata-rata RGB. Piksel silau dibuang. Jika kotak ini bukan hidung insulator, abaikan kesimpulan.</p></div>" +
+            "<p class=\"small muted\">Kelas warna terdekat, sebelum pengamatan mata:</p><ol class=\"tight\">" + top + "</ol></article>" +
+            noteHtml +
+            "<article class=\"card\"><h3>Pengamatan yang tidak terlihat kamera</h3>" +
+            "<p class=\"small muted\">Pilihan ini mengubah kesimpulan lebih kuat daripada selisih warna yang tipis.</p>" +
+            group("Permukaan ujung", "surface", [
+                ["unknown", "Belum dilihat"],
+                ["dry", "Kering doff"],
+                ["oil", "Basah oli"],
+                ["fuel", "Basah bensin"],
+                ["glaze", "Mengilap seperti kaca"],
+                ["mottled", "Bercak tidak rata"],
+                ["bridged", "Celah tersambung kerak"]
+            ]) +
+            group("Elektroda dan keramik", "electrode", [
+                ["unknown", "Belum dilihat"],
+                ["ok", "Utuh, masih siku"],
+                ["worn", "Membulat, celah melebar"],
+                ["melted", "Terkikis atau meleleh"],
+                ["cracked", "Insulator retak"],
+                ["broken", "Patah atau terpukul"]
+            ]) +
+            group("Asap knalpot", "smoke", [
+                ["unknown", "Tidak dicatat"],
+                ["none", "Tidak ada asap aneh"],
+                ["black", "Hitam"],
+                ["blue", "Biru"],
+                ["white", "Putih"]
+            ]) +
+            group("Jenis mesin", "engine", [
+                ["unknown", "Tidak diisi"],
+                ["4t", "4 langkah"],
+                ["2t", "2 langkah"]
+            ]) +
+            "</article>" +
+            "<article class=\"card\"><h3>Apa yang terlihat</h3><p>" + esc(cond.summary) + "</p><p>" + esc(cond.see) + "</p></article>" +
+            "<article class=\"card\"><h3>Artinya pada pembakaran</h3><p>" + esc(cond.meaning) + "</p></article>" +
+            "<article class=\"card\"><h3>Kemungkinan penyebab, dari yang paling berguna diperiksa</h3>" + list(cond.causes) + "</article>" +
+            "<article class=\"card\"><h3>Pemeriksaan</h3>" + list(cond.checks) + "</article>" +
+            "<article class=\"card\"><h3>Tindakan</h3>" + list(cond.actions) + "</article>" +
+            "<article class=\"card\"><h3>Kesalahan baca yang sering</h3>" + list(cond.pitfalls) + "</article>" +
+            "<div class=\"row\" style=\"margin-top:12px\">" +
+            "<button class=\"btn secondary grow\" id=\"copyBtn\" type=\"button\">Salin laporan</button>" +
+            "<button class=\"btn secondary grow\" id=\"saveBtn\" type=\"button\">Simpan di daftar</button>" +
+            "<button class=\"btn grow\" id=\"againBtn\" type=\"button\">Ambil ulang</button></div>" +
+            "<div id=\"log\"></div>";
+        const patch = document.getElementById("patch");
+        patch.getContext("2d").drawImage(work, 0, 0);
+        bindChips();
+        document.getElementById("copyBtn").onclick = copyReport;
+        document.getElementById("saveBtn").onclick = saveReading;
+        document.getElementById("againBtn").onclick = function () {
+            resultEl.hidden = true;
+            viewport.scrollIntoView({ behavior: "smooth" });
+        };
+        renderLog();
+    }
+
+    function stat(label, value, hint) {
+        return "<div class=\"stat\"><b>" + esc(value) + "</b><span>" + esc(label) + "<br>" + esc(hint) + "</span></div>";
+    }
+
+    function group(title, key, options) {
+        const chips = options.map(function (opt) {
+            const pressed = obs[key] === opt[0] ? "true" : "false";
+            return "<button type=\"button\" class=\"chip\" data-key=\"" + key + "\" data-val=\"" + opt[0] + "\" aria-pressed=\"" + pressed + "\">" + esc(opt[1]) + "</button>";
+        }).join("");
+        return "<p class=\"small\" style=\"margin-bottom:4px\"><strong>" + esc(title) + "</strong></p><div class=\"chips\">" + chips + "</div>";
+    }
+
+    function bindChips() {
+        resultEl.querySelectorAll(".chip").forEach(function (chip) {
+            chip.onclick = function () {
+                obs[chip.dataset.key] = chip.dataset.val;
+                render();
+            };
+        });
+    }
+
+    function reportText() {
+        const ranked = rankClasses(lastSample.lab);
+        const decision = refine(lastSample, ranked, lastSample.gate);
+        const cond = CONDITIONS[decision.id];
+        const lines = [
+            "BENYAMIN BATAU APP — laporan baca ujung busi",
+            "Kesimpulan: " + cond.title,
+            "Keyakinan warna: " + decision.confidence + "%",
+            lastSample.hex + " RGB(" + lastSample.rgb.join(", ") + ")",
+            "L* " + lastSample.L.toFixed(1) + " a* " + lastSample.a.toFixed(1) + " b* " + lastSample.b.toFixed(1) + " C* " + lastSample.c.toFixed(1),
+            "ΔE00 terdekat " + (ranked[0] ? ranked[0].de.toFixed(1) : "-"),
+            "",
+            cond.summary,
+            "",
+            "Arti: " + cond.meaning,
+            "",
+            "Tindakan:",
+            cond.actions.map(function (a) { return "- " + a; }).join("\n"),
+            "",
+            "Alat ini bukan alat ukur tersertifikasi. Bandingkan celah, kompresi, dan tekanan bahan bakar dengan buku model."
+        ];
+        return lines.join("\n");
+    }
+
+    function copyReport() {
+        const text = reportText();
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(text).then(function () {
+                document.getElementById("copyBtn").textContent = "Laporan tersalin";
+            }, function () { fallbackCopy(text); });
+        } else fallbackCopy(text);
+    }
+
+    function fallbackCopy(text) {
+        const area = document.createElement("textarea");
+        area.value = text;
+        document.body.appendChild(area);
+        area.select();
+        try { document.execCommand("copy"); } catch (e) { /* biarkan pengguna menyalin manual */ }
+        document.body.removeChild(area);
+        document.getElementById("copyBtn").textContent = "Laporan tersalin";
+    }
+
+    function saveReading() {
+        const ranked = rankClasses(lastSample.lab);
+        const decision = refine(lastSample, ranked, lastSample.gate);
+        const entry = {
+            t: new Date().toLocaleString("id-ID"),
+            title: CONDITIONS[decision.id].title,
+            hex: lastSample.hex,
+            score: decision.confidence
+        };
+        const all = loadLog();
+        all.unshift(entry);
+        try { sessionStorage.setItem("busi-log", JSON.stringify(all.slice(0, 8))); } catch (e) { /* mode pribadi bisa menolak */ }
+        renderLog();
+    }
+
+    function loadLog() {
+        try {
+            const raw = sessionStorage.getItem("busi-log");
+            return raw ? JSON.parse(raw) : [];
+        } catch (e) { return []; }
+    }
+
+    function renderLog() {
+        const host = document.getElementById("log");
+        if (!host) return;
+        const all = loadLog();
+        if (!all.length) {
+            host.innerHTML = "";
+            return;
+        }
+        host.innerHTML = "<article class=\"card\"><h3>Pembacaan sesi ini</h3><p class=\"small muted\">Pakai daftar ini untuk membandingkan silinder. Daftar hilang saat tab ditutup.</p><ul class=\"tight\">" +
+            all.map(function (item) {
+                return "<li>" + esc(item.t) + " — " + esc(item.title) + " (" + esc(item.hex) + ", " + esc(item.score) + "%)</li>";
+            }).join("") + "</ul></article>";
+    }
+
+    async function startCamera() {
+        if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+            document.getElementById("camState").textContent = "tidak tersedia";
+            document.getElementById("aimState").textContent = "pakai foto galeri";
+            snapBtn.disabled = usingStill ? false : true;
+            return;
+        }
+        if (stream) {
+            stream.getTracks().forEach(function (track) { track.stop(); });
+        }
+        torchOn = false;
+        torchBtn.hidden = true;
+        try {
+            stream = await navigator.mediaDevices.getUserMedia({
+                video: {
+                    facingMode: { ideal: facing },
+                    width: { ideal: 1280 },
+                    height: { ideal: 720 }
+                },
+                audio: false
+            });
+            video.srcObject = stream;
+            usingStill = false;
+            still.classList.remove("show");
+            video.classList.remove("hide");
+            await video.play();
+            document.getElementById("camState").textContent = "aktif";
+            document.getElementById("sourceState").textContent = facing === "environment" ? "kamera belakang" : "kamera depan";
+            const enable = function () { if (!usingStill) snapBtn.disabled = false; };
+            if (video.videoWidth) enable();
+            else video.onloadedmetadata = enable;
+            const track = stream.getVideoTracks()[0];
+            const caps = track.getCapabilities ? track.getCapabilities() : {};
+            if (caps.torch) torchBtn.hidden = false;
+            try {
+                await track.applyConstraints({ advanced: [{ focusMode: "continuous" }] });
+            } catch (e) { /* tidak semua ponsel menerima fokus */ }
+            monitorLight();
+        } catch (err) {
+            const denied = err && (err.name === "NotAllowedError" || err.name === "SecurityError");
+            document.getElementById("camState").textContent = denied ? "izin ditolak" : "tidak bisa dibuka";
+            document.getElementById("aimState").textContent = "pakai foto galeri";
+            if (!usingStill) snapBtn.disabled = true;
+        }
+    }
+
+    function monitorLight() {
+        clearInterval(lightTimer);
+        lightTimer = setInterval(function () {
+            if (busy || usingStill || !video.videoWidth) return;
+            const ctx = lightCanvas.getContext("2d", { willReadFrequently: true });
+            lightCanvas.width = 32;
+            lightCanvas.height = 32;
+            ctx.drawImage(video, 0, 0, 32, 32);
+            const sample = measurePatch(ctx.getImageData(0, 0, 32, 32));
+            let label = "cukup";
+            if (sample.highlightRatio > 0.35) label = "silau — geser lampu";
+            else if (sample.kept < 8 || (sample.crushedRatio > 0.55 && sample.L < 18)) label = "gelap — jangan dibaca";
+            else if (sample.c > 20 && (sample.h < 50 || sample.h > 330)) label = "cahaya kekuningan";
+            document.getElementById("lightState").textContent = label;
+        }, 1200);
+    }
+
+    async function toggleTorch() {
+        if (!stream) return;
+        const track = stream.getVideoTracks()[0];
+        torchOn = !torchOn;
+        try {
+            await track.applyConstraints({ advanced: [{ torch: torchOn }] });
+            torchBtn.textContent = torchOn ? "Senter menyala" : "Senter";
+        } catch (e) {
+            torchOn = false;
+            torchBtn.textContent = "Senter tidak tersedia";
+        }
+    }
+
+    function analyze() {
+        if (busy) return;
+        const mapped = mapRectToSource(reticle.getBoundingClientRect());
+        if (!mapped) {
+            document.getElementById("aimState").textContent = "sumber belum siap";
+            return;
+        }
+        busy = true;
+        loadingText.textContent = "Mengukur warna bingkai…";
+        loading.classList.add("show");
+        requestAnimationFrame(function () {
+            requestAnimationFrame(function () {
+                try {
+                    const image = drawRegion(mapped, work, 160, 160);
+                    const sample = measurePatch(image);
+                    sample.gate = gateSample(sample, cornerCast(mapped));
+                    lastSample = sample;
+                    render();
+                    resultEl.scrollIntoView({ behavior: "smooth", block: "start" });
+                } catch (err) {
+                    document.getElementById("aimState").textContent = "gagal mengukur";
+                } finally {
+                    busy = false;
+                    loading.classList.remove("show");
+                }
+            });
+        });
+    }
+
+    snapBtn.onclick = analyze;
+    torchBtn.onclick = toggleTorch;
+    flipBtn.onclick = function () {
+        facing = facing === "environment" ? "user" : "environment";
+        startCamera();
+    };
+    fileInput.onchange = function () {
+        const file = fileInput.files && fileInput.files[0];
+        if (!file) return;
+        if (objectUrl) URL.revokeObjectURL(objectUrl);
+        objectUrl = URL.createObjectURL(file);
+        still.onload = function () {
+            usingStill = true;
+            still.classList.add("show");
+            video.classList.add("hide");
+            document.getElementById("sourceState").textContent = "foto galeri";
+            document.getElementById("camState").textContent = "foto";
+            document.getElementById("lightState").textContent = "diukur saat analisis";
+            snapBtn.disabled = false;
+            fileInput.value = "";
+        };
+        still.onerror = function () {
+            document.getElementById("aimState").textContent = "foto tidak terbaca";
+        };
+        still.src = objectUrl;
+    };
+
+    document.addEventListener("visibilitychange", function () {
+        if (document.hidden) clearInterval(lightTimer);
+        else if (stream && !usingStill) monitorLight();
+    });
+
+    window.addEventListener("load", startCamera);
+})();
 </script>
 </body>
-</html></html>
+</html>
